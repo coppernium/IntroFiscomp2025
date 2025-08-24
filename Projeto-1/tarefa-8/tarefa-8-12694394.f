@@ -1,11 +1,16 @@
         program main
-                real*8 d,vol
-                do i =1,25
-                d = i
-                write(1,*) i,vol(1d0,d)
-                end do
-7               format(I3,F12.8)
+                real*8 d,r,vol
+                r = 1d0
 
+                open(unit=1,file='saida-1-12694394.txt')
+                write(1,3) 
+                do i =0,300
+                d = i
+                write(1,7) i,vol(r,d)/(r**3),abs((r**3)-vol(r,d))
+                end do
+                close(1)
+7               format(I3,F12.8,F12.8)
+3               format("dimensão  r^3/vol  abs(r^3 - vol)")
         end program main
 
         real*8 function f(x)

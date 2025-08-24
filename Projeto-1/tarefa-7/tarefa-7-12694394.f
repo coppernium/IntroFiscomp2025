@@ -1,9 +1,13 @@
         program main
-                real*8 d,vol
-                do i =1,25
+                real*8 d,r,vol
+                r = 1.1d0
+
+                open(unit=1,file='saida-3-12694394.txt')
+                do i =0,25
                 d = i
-                write(1,*) i,vol(1d0,d)
+                        write(1,7) i,vol(r,d) 
                 end do
+                close(1)
 7               format(I3,F12.8)
 
         end program main

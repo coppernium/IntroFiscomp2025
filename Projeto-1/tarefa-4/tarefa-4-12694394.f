@@ -1,20 +1,59 @@
         program main
-                real*8 x,tol,res,d,r
-                tol = 1e-6
-                x = 3.22d0
+                complex*16 meu_ln
+                real*8 x,x2,tol
 
-                write(*,*) calc1(x,tol), log(x)
+                open(unit=1,file='saida-1-12694394.txt')
+                tol = 1d-6
+                x = -3d0
+
+                do while (x .LT. 3d0)
+                        x2 = abs(meu_ln(x,tol))
+                        write(1,3) x, x2
+                        x = x + 0.1d0
+                end do
+
+                3   format(F16.8,F16.8)
+                close(1)
+end program main
+
+
         end program main
 
-        function calc1(x,tol)
-                real*8 x,tol,rr
 
-                i = 1
-                calc1 = 1
-                do while (abs(rr) .GE. tol)
-                        rr = - ((1-x)**i)/i
-                        calc1 = calc1 + rr
-                        i = i + 1
-                end do
-                return
-        end function calc1
+        function meu_ln(x,tol)
+        complex*16 meu_ln
+        real*8 x,tol,pi
+        real*8 x1,rr,ri,k,slk
+
+        pi = acos(-1d0)
+        slk  = 1d0
+        if (x .LT. 1d0) then
+                x = 1d0/x
+        endif
+
+        k = 1d0
+        x1 = x
+        do while (x1 .GE. 2d0)
+                k = k * 2d0
+                x1 = x ** (1d0/k)
+        end do
+
+        meu_ln = 0d0
+        rr = 1d0
+        i = 1
+        do while (abs(rr) .GE. tol)
+                ri = i
+                rr  = -((1d0 - x1)**i)/ri
+                meu_ln = meu_ln + rr
+                i = i + 1
+        end do
+
+        meu_ln = slk * k*meu_ln
+
+        !caso x seja negativo
+        if (x .LT. 0d0) then
+        meu_ln = meu_ln + (0d0, 1d0)*pi
+        endif
+
+        return
+        end function meu_ln

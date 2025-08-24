@@ -1,22 +1,26 @@
         program main
-                parameter(M=1e6)
-                read(*,*) id
-        x = carlo(1e0,id,M)
-        write(*,*) x
+                parameter(M=1e8)
+                real*8 x,carlo
+
+                do i =1,25
+                write(2,*) i,carlo(1d0,i,M)
+                end do
         end program main
 
-        function carlo(r,id,M)
+        real*8 function carlo(r,id,M)
+                real*8 c,r,p,rM
                 c = 0
+                rM=M
                 do i = 1,M
                         p = 0
                         do j = 1,id
-                                p = p + (2e0*rand() -1e0)**2
+                                p = p + (2d0*rand() -1d0)**2
                         end do
                         
                         if (p .LT. r*r) then
-                                c = c + 1
+                                c = c + 1d0
                         end if
                 end do
 
-                carlo = (c/M)*((2*r)**id)
+                carlo = (c/rM)*((2d0*r)**id)
         end function carlo

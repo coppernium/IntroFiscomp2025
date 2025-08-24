@@ -1,19 +1,20 @@
-        program ex6
-                parameter(M=1e3)
-                r = 3e0
-                open(2,file='ex6.dat')
-                write(1,*) '#MC','Gamma','|MC-Gamma|'
-                do i = 1,100
-                        d = i
-                        x1 = carlo(r,d,M)
-                        x2 = vol(r,d)
-                        write(2,*) x1,x2,abs(x1-x2)
+        program main
+                parameter(M=1e7)
+                real*8 d,r,vol,carlo,x1,x2
+                r = 1d0
+
+                do i =2,4
+                d = i
+                x1= vol(r,d) 
+                x2 = carlo(r,i,M)
+                        write(*,*) i,x1,x2,abs(x1-x2)
                 end do
-                close(2)
-        end program ex6
+7               format(I3,F12.8,F12.8)
 
+        end program main
 
-        function f(x)
+        real*8 function f(x)
+                real*8 x,pi
                 pi = acos(-1.e0)
                 f = 1e0
                 if (mod(x,1e0) .NE. 0e0) then
@@ -31,26 +32,28 @@
         return
         end function f
 
-        function vol(r,d)
-                real*4 r,d
-                pi = acos(-1e0)
-                vol = (pi**(d/2e0))*(r**d)/f(1e0+(d/2e0))
+        real*8 function vol(r,d)
+                real*8 r,d,pi,f
+                pi = acos(-1d0)
+                vol = (pi**(d/2d0))*(r**d)/f(1d0+(d/2d0))
         return
         end function vol
 
-        function carlo(r,d,M)
+
+        real*8 function carlo(r,id,M)
+                real*8 c,r,p,rM
                 c = 0
-                id = d
+                rM=M
                 do i = 1,M
                         p = 0
                         do j = 1,id
-                                p = p + (2e0*rand() -1e0)**2
+                                p = p + (2d0*rand() -1d0)**2
                         end do
                         
                         if (p .LT. r*r) then
-                                c = c + 1
+                                c = c + 1d0
                         end if
                 end do
 
-                carlo = (c/M)*((2*r)**id)
+                carlo = (c/rM)*((2d0*r)**id)
         end function carlo
