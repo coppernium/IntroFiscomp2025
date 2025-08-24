@@ -3,19 +3,17 @@
                 real*8 x,x2,tol
 
                 open(unit=1,file='saida-1-12694394.txt')
-                tol = 1d-6
-                x = -3d0
-
-                do while (x .LT. 3d0)
+                write(1,*) 'x   meu_ln(x)       log(x)'
+                tol = 1d-9
+                x= 1d0
+                do while (x .LT. 10d0)
                         x2 = abs(meu_ln(x,tol))
-                        write(1,3) x, x2
+                        write(1,3) x, x2,dlog(x),abs(x2 - dlog(x))
                         x = x + 0.1d0
+
                 end do
-
-                3   format(F16.8,F16.8)
+3               format(F16.8,F16.8,F16.8,F16.8)
                 close(1)
-end program main
-
 
         end program main
 
@@ -24,6 +22,8 @@ end program main
         complex*16 meu_ln
         real*8 x,tol,pi
         real*8 x1,rr,ri,k,slk
+
+        x_ini = x   ! guarda valor original
 
         pi = acos(-1d0)
         slk  = 1d0
@@ -51,7 +51,7 @@ end program main
         meu_ln = slk * k*meu_ln
 
         !caso x seja negativo
-        if (x .LT. 0d0) then
+        if (x_ini .LT. 0d0) then
         meu_ln = meu_ln + (0d0, 1d0)*pi
         endif
 
