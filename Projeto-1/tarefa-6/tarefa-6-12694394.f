@@ -7,9 +7,9 @@
                 d = i
                 x1= vol(r,d) 
                 x2 = carlo(r,i,M)
-                        write(*,*) i,x1,x2,abs(x1-x2)
+                        write(*,7) i,x1,x2,abs(x1-x2)
                 end do
-7               format(I3,F12.8,F12.8)
+7               format(I3,F12.8,F12.8,F12.8)
 
         end program main
 
