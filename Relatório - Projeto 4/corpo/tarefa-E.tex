@@ -1,0 +1,238 @@
+\chapter*{Tarefa - E}
+
+\section*{Enunciado}
+\begin{figure}[H]
+\centering
+\caption{Enunciado da Tarefa E.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-E/enunciado-tarefaE.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa E - Enunciado}
+\end{figure}
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+        program main
+            implicit real*8 (a-h,o-z)
+            call poincare_secao()
+        end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa E - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+
+        subroutine poincare_secao()
+            parameter(imax=1e6)
+            implicit real*8 (a-h,o-z)
+            dimension w(0:imax), th(0:imax)
+
+            pi = acos(-1d0)
+            g  = 9.81d0
+            rl = 9.81d0
+            dt = 0.04d0
+            c1 = 0.05d0
+            c2 = 1.2d0
+            c3 = 0.666d0
+
+            w(0)  = 0.0d0
+            th(0) = pi/60d0
+
+            open(unit=10,file='saida-1-12694394.txt')
+            write(10,9)
+
+            do i = 0, imax-1
+                t  = i*dt
+                rr = c3*t
+                F = -c1*w(i) + c2*sin(rr)
+                w(i+1)  = w(i) - (g/rl)*sin(th(i))*dt + F*dt
+                th(i+1) = th(i) + w(i+1)*dt
+
+                if (th(i+1) .GT. 2*pi) then
+                    th(i+1) = th(i+1) - 2*pi
+                else if (th(i+1) .LT. 0d0) then
+                    th(i+1) = th(i+1) + 2*pi
+                end if
+
+                if (abs(mod(c3*t, pi)) .LT. (c3*dt/2d0)) then
+                    write(10,8) w(i+1), th(i+1)
+                end if
+            end do
+
+            close(10)
+8           format(F16.8,',',F16.8)
+9           format('omega,theta')
+            return
+        end
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa E - Euler Cromer código}
+\end{figure}
+
+\section*{Descrição do código}
+
+O programa \texttt{main} tem como objetivo chamar a subrotina 
+\texttt{poincare\_secao}, responsável por calcular a seção de Poincaré de 
+um pêndulo amortecido e forçado, utilizando o método numérico de 
+\textit{Euler-Cromer}.  
+A simulação permite analisar o comportamento dinâmico do sistema em 
+regimes periódicos e caóticos, registrando apenas os pontos específicos 
+que compõem a seção de Poincaré.
+
+\vspace*{1\baselineskip}
+\noindent
+Toda a integração numérica e o armazenamento dos resultados são realizados 
+dentro da subrotina \texttt{poincare\_secao}.  
+
+\subsection*{Parâmetros e variáveis}
+
+Na subrotina, define-se o número máximo de iterações 
+\texttt{imax = 1×10\textsuperscript{6}} e são criados dois vetores 
+principais: \texttt{w} e \texttt{th}, que armazenam, respectivamente, a 
+velocidade angular ($\omega$) e o ângulo ($\theta$) do pêndulo ao longo do 
+tempo.
+
+As constantes físicas e parâmetros da força externa são definidos como:
+
+\begin{lstlisting}
+pi = acos(-1d0)   ! Valor de pi
+g  = 9.81d0       ! Aceleração da gravidade
+rl = 9.81d0       ! Comprimento do pêndulo
+dt = 0.04d0       ! Passo temporal
+c1 = 0.05d0       ! Coeficiente de amortecimento (gamma)
+c2 = 1.2d0        ! Amplitude da força externa (F_0)
+c3 = 0.666d0      ! Frequência angular da força externa
+\end{lstlisting}
+
+\noindent
+As condições iniciais do sistema são:
+\begin{lstlisting}
+w(0)  = 0.0d0
+th(0) = pi/60d0
+\end{lstlisting}
+
+\noindent
+Esses valores correspondem a um pêndulo inicialmente em repouso, com um 
+pequeno deslocamento angular inicial, sujeito à ação de uma força externa 
+periódica e a um termo de amortecimento viscoso.
+
+\subsection*{Integração pelo método de Euler-Cromer}
+
+A integração numérica é realizada dentro de um laço que percorre de 
+\texttt{i = 0} até \texttt{imax - 1}.  
+Em cada iteração, calcula-se a força resultante sobre o pêndulo, composta 
+pelos termos de amortecimento e força externa:
+
+\begin{lstlisting}
+t  = i*dt
+rr = c3*t
+F  = -c1*w(i) + c2*sin(rr)
+\end{lstlisting}
+
+\noindent
+As equações diferenciais são integradas pelo método de 
+\textit{Euler-Cromer}, que atualiza primeiro a velocidade angular e, em 
+seguida, o ângulo:
+
+\begin{lstlisting}
+w(i+1)  = w(i) - (g/rl)*sin(th(i))*dt + F*dt
+th(i+1) = th(i) + w(i+1)*dt
+\end{lstlisting}
+
+\noindent
+Esse método é mais estável para sistemas oscilatórios, pois utiliza o 
+valor atualizado da velocidade para calcular a posição.
+
+\subsection*{Correção angular e critério da seção de Poincaré}
+
+Após a atualização, o ângulo é ajustado para permanecer dentro do 
+intervalo $[0, 2\pi]$, evitando que valores excedam esse limite devido à 
+integração acumulada:
+
+\begin{lstlisting}
+if (th(i+1) .GT. 2*pi) then
+    th(i+1) = th(i+1) - 2*pi
+else if (th(i+1) .LT. 0d0) then
+    th(i+1) = th(i+1) + 2*pi
+end if
+\end{lstlisting}
+
+\noindent
+A cada passo, o código verifica se o instante atual $t$ corresponde 
+aproximadamente a um múltiplo de $\pi / \omega_{força}$, ou seja, se o 
+sistema se encontra na mesma fase da força externa.  
+Quando essa condição é satisfeita, o par 
+$(\omega, \theta)$ é registrado no arquivo de saída, compondo a 
+\textit{seção de Poincaré}:
+
+\begin{lstlisting}
+if (abs(mod(c3*t, pi)) .LT. (c3*dt/2d0)) then
+    write(10,8) w(i+1), th(i+1)
+end if
+\end{lstlisting}
+
+\subsection*{Armazenamento dos resultados}
+
+Os pontos da seção de Poincaré são salvos no arquivo 
+\texttt{saida-1-12694394.txt}, em formato CSV, com as colunas 
+\texttt{omega} e \texttt{theta}.  
+O formato de escrita utilizado é:
+
+\begin{lstlisting}
+8 format(F16.8,',',F16.8)
+\end{lstlisting}
+
+\noindent
+O arquivo é finalizado com o comando \texttt{close(10)} após o término 
+das iterações.
+
+\subsection*{Resumo}
+
+Em síntese, o código implementa a simulação de um pêndulo amortecido e 
+forçado, aplicando o método de Euler-Cromer e registrando apenas os pontos 
+pertencentes à seção de Poincaré.  
+Esses pontos representam o estado do sistema em instantes sincronizados 
+com a força externa, permitindo a visualização de órbitas periódicas, 
+quase-periódicas e caóticas no espaço de fases.  
+Esse tipo de análise é fundamental no estudo de sistemas não lineares e 
+fenômenos caóticos em mecânica clássica.
+
+\section*{Resultados}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 1.2}
+\centering
+\includegraphics[width=16cm]{images/tarefa-E/saida-1-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa E - Resultado 1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 0.5}
+\centering
+\includegraphics[width=16cm]{images/tarefa-E/saida-2-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa E - Resultado 2}
+\end{figure}

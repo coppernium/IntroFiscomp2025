@@ -1,0 +1,295 @@
+\chapter*{Tarefa - D}
+
+\section*{Enunciado}
+
+\begin{figure}[H]
+\centering
+\caption{Enunciado da Tarefa D.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-D/enunciado-tarefaD.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Enunciado}
+\end{figure}
+
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+        program main
+            implicit real*8 (a-h,o-z)
+            call poincare()
+        end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+
+        subroutine poincare()
+            parameter(imax=1e6)
+            implicit real*8 (a-h,o-z)
+            dimension w(0:imax), th(0:imax)
+            dimension ival(0:imax)
+C           Constantes
+            pi = acos(-1d0)
+            g = 9.81d0
+            rl = 9.81d0
+            dt = 0.04d0
+            c1 = 0.05d0 ! Fator de amorteciemento (gamma)
+            c2 = 1.2d0 ! F_0
+            c3 = 0.666d0 ! Frequencia angular da força extena
+
+C           Valores iniciais
+            w(0) = 0
+            th(0) = pi/60d0
+            ival(0) = 0
+C           Realiza a simulação
+            open(unit=7,file='saida-2-12694394.txt')
+            write(7,9)
+
+            do i = 0,imax-1
+                rr = c3*i*dt
+                F = -c1*w(i) + c2*sin(rr)
+                w(i+1) = w(i) -(g/rl)*sin(th(i))*dt +F*dt
+                th(i+1) = th(i) + w(i+1)*dt
+                
+                if (abs(mod(rr, pi)) .LE. 1d-3) then
+                    ival(i+1) = 1
+                    write(7,8) w(i+1),th(i+1)
+                else
+                    ival(i+1) = 0
+                end if
+
+            end do
+
+            close(7)
+8           format(F16.8,',',F16.8)
+9           format('omega,theta')
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Euler Cromer código 1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+
+C           Salva os dados
+            open(unit=1,file='saida-1-12694394.txt')
+                write(1,3)
+            do i = 0,imax-1
+            ! Aqui eu tenho que eu tenho que fazer o trem do angulo
+            if (th(i+1).GT. 2*pi) then
+                th(i+1) = th(i+1) -2*pi
+            else if (th(i+1) .LT. 0d0) then
+                th(i+1) = th(i+1) + 2*pi
+            end if
+
+
+                write(1,2) ival(i),dt*i, w(i),th(i)
+            end do
+2           format(I2,3(',',F16.8))
+3           format('poincare,temp,omega,theta')
+            close(1)
+
+
+
+        end subroutine poincare
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Euler Cromer código}
+\end{figure}
+
+\section*{Descrição do código}
+
+O programa \texttt{main} tem como função principal chamar a subrotina 
+\texttt{poincare}, responsável por simular o movimento de um pêndulo 
+forçado e amortecido por meio do método numérico de 
+\textit{Euler-Cromer}.  
+O objetivo da simulação é gerar o mapa de Poincaré do sistema, 
+permitindo a análise do comportamento dinâmico e a identificação 
+de regimes periódicos ou caóticos.
+
+\vspace*{1\baselineskip}
+\noindent
+Toda a parte computacional é implementada dentro da subrotina 
+\texttt{poincare}, que realiza tanto a integração temporal das equações 
+de movimento quanto o registro dos dados em arquivos de saída.  
+
+\subsection*{Parâmetros e variáveis}
+
+Na subrotina \texttt{poincare}, é definido o número máximo de iterações 
+\texttt{imax = 1×10\textsuperscript{6}}, e são criados três vetores 
+principais:  
+\texttt{w} (velocidades angulares), \texttt{th} (ângulos) e 
+\texttt{ival} (indicador lógico que identifica os pontos de Poincaré).  
+
+As constantes e parâmetros físicos do sistema são definidos como:
+
+\begin{lstlisting}
+pi = acos(-1d0)   ! Valor de pi
+g  = 9.81d0       ! Aceleração da gravidade
+rl = 9.81d0       ! Comprimento do pêndulo
+dt = 0.04d0       ! Passo temporal
+c1 = 0.05d0       ! Coeficiente de amortecimento (gamma)
+c2 = 1.2d0        ! Amplitude da força externa (F0)
+c3 = 0.666d0      ! Frequência angular da força externa
+\end{lstlisting}
+
+\noindent
+As condições iniciais são:
+\begin{lstlisting}
+w(0)  = 0
+th(0) = pi/60d0
+ival(0) = 0
+\end{lstlisting}
+
+\noindent
+Esses valores definem um pêndulo inicialmente quase vertical e sem 
+velocidade angular, sujeito a uma força externa periódica e a um 
+amortecimento viscoso.
+
+\subsection*{Integração pelo método de Euler-Cromer}
+
+A simulação é realizada dentro de um laço que percorre todas as 
+iterações de $i = 0$ até \texttt{imax - 1}.  
+Em cada passo, calcula-se a força total atuante sobre o pêndulo, composta 
+pelo termo de amortecimento e pela força externa periódica:
+
+\begin{lstlisting}
+rr = c3*i*dt
+F  = -c1*w(i) + c2*sin(rr)
+\end{lstlisting}
+
+\noindent
+Em seguida, as equações diferenciais do sistema são integradas utilizando 
+o método de Euler-Cromer:
+
+\begin{lstlisting}
+w(i+1)  = w(i) - (g/rl)*sin(th(i))*dt + F*dt
+th(i+1) = th(i) + w(i+1)*dt
+\end{lstlisting}
+
+\noindent
+Esse método utiliza o valor atualizado da velocidade angular para 
+calcular a posição, conferindo maior estabilidade numérica, especialmente 
+para sistemas oscilatórios.
+
+\subsection*{Construção do mapa de Poincaré}
+
+Durante a simulação, o programa verifica se o argumento da força 
+$c_3 i \, dt$ é aproximadamente um múltiplo de $\pi$.  
+Essa condição identifica os instantes em que o sistema completa um ciclo 
+da força externa.  
+Quando isso ocorre, o valor da velocidade angular $\omega$ e do ângulo 
+$\theta$ são registrados no arquivo \texttt{saida-2-12694394.txt}, 
+formando o conjunto de pontos do mapa de Poincaré:
+
+\begin{lstlisting}
+if (abs(mod(rr, pi)) .LE. 1d-3) then
+    ival(i+1) = 1
+    write(7,8) w(i+1), th(i+1)
+else
+    ival(i+1) = 0
+end if
+\end{lstlisting}
+
+\noindent
+Esses pontos permitem analisar visualmente a evolução do sistema no 
+espaço de fases sob o regime forçado, revelando comportamentos 
+periódicos, quase-periódicos ou caóticos.
+
+\subsection*{Armazenamento dos resultados completos}
+
+Além do mapa de Poincaré, o código também grava os dados completos da 
+simulação no arquivo \texttt{saida-1-12694394.txt}.  
+Antes de salvar, o ângulo é ajustado para permanecer dentro do intervalo 
+$[0, 2\pi]$, garantindo a consistência do gráfico de fase.  
+O arquivo contém, para cada iteração:
+
+\begin{itemize}
+    \item o identificador de ponto de Poincaré (\texttt{ival(i)}),
+    \item o tempo ($t = i \cdot \Delta t$),
+    \item a velocidade angular ($\omega$),
+    \item e o ângulo ($\theta$).
+\end{itemize}
+
+\noindent
+Os dados são escritos no formato:
+\begin{lstlisting}
+2 format(I2,3(',',F16.8))
+\end{lstlisting}
+
+\noindent
+e o arquivo é finalizado com o comando \texttt{close(1)}.
+
+\subsection*{Resumo}
+
+Em resumo, o código implementa a simulação de um pêndulo amortecido e 
+forçado, aplicando o método de Euler-Cromer para integração numérica e 
+gerando o mapa de Poincaré do sistema.  
+A análise dos pontos registrados permite identificar regimes de 
+periodicidade, transições para o caos e comportamento determinístico 
+complexo, característico de sistemas não lineares forçados.
+
+\section*{Resultados}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 1.2}
+\centering
+\includegraphics[width=16cm]{images/tarefa-D/saida-1-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Resultado 1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 1.2 com filtro de Poincaré}
+\centering
+\includegraphics[width=16cm]{images/tarefa-D/saida-2-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Resultado 2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 0.5}
+\centering
+\includegraphics[width=16cm]{images/tarefa-D/saida-3-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Resultado 3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos para $F_0$ = 0.5 com filtro de Poincaré}
+\centering
+\includegraphics[width=16cm]{images/tarefa-D/saida-4-12694394.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa D - Resultado 4}
+\end{figure}
+

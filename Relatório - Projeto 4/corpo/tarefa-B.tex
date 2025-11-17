@@ -1,0 +1,199 @@
+\chapter*{Tarefa - B}
+
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+        program main
+        call euler_crommer()
+        end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa B - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+
+        subroutine euler_crommer()
+        parameter (imax=1e4)
+        implicit real*8(a-h,o-z)
+        dimension th(0:imax),w(0:imax)
+
+C       Constantes
+        rl = 9.81d0
+        g = 9.81d0
+        m = 1d0
+        y = 0.050d0 !Gamma
+        F0 = 0.50d0 !Força externa
+        ome = 0.75d0 ! Frequência da força externa
+        pi = acos(-1d0)
+        dt = 0.04d0
+
+C       Valores iniciais
+        w(0) = 0
+        th(0) = pi/3d0
+
+C       Cálculo
+
+        do i = 0,imax-1
+                F_ex = -y*w(i) + F0*sin(ome*i*dt)
+                w(i+1) = w(i)-(g/rl)*sin(th(i))*dt + F_ex*dt
+                th(i+1) = th(i) + w(i+1)*dt
+        end do
+
+C       Salva a posição
+        open(unit=1,file='saida-1-12694394.txt')
+        do i =0,imax
+        ! Trem das posições
+        if (th(i+1) .GT. 2*pi) then
+                th(i+1) = th(i+1) - 2*pi
+        else if (th(i+1) .LT. 0 ) then
+                th(i+1) = th(i+1) + 2*pi
+        end if
+
+                write(1,7) i*dt, w(i), th(i)
+        end do
+7       format(F12.6,F12.6,F12.6)
+        close(1)
+        end subroutine euler_crommer
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa B - Euler Cromer código}
+\end{figure}
+
+
+
+\newpage\section*{Descrição do código}
+
+O programa \texttt{main} tem como objetivo simular numericamente o movimento 
+de um pêndulo simples sujeito a atrito viscoso e a uma força externa 
+periódica, utilizando o método de integração de \textit{Euler-Cromer}.  
+O cálculo é implementado na subrotina \texttt{euler\_crommer}, chamada a 
+partir do programa principal.  
+
+\vspace*{1\baselineskip}
+\noindent
+A diretiva
+
+\begin{lstlisting}
+implicit real*8 (a-h,o-z)
+\end{lstlisting}
+
+\noindent
+define todas as variáveis cujos nomes iniciam com as letras de 
+\textbf{a} a \textbf{h} e \textbf{o} a \textbf{z} como números reais de 
+dupla precisão, garantindo maior precisão nos cálculos numéricos.  
+
+\subsection*{Subrotina \texttt{euler\_crommer}}
+
+A subrotina \texttt{euler\_crommer} executa o cálculo principal da 
+simulação.  
+Primeiramente, são definidos o número máximo de iterações 
+(\texttt{imax = 1e4}) e os vetores \texttt{w(0:imax)} e 
+\texttt{th(0:imax)}, que armazenam respectivamente a velocidade angular 
+($\omega$) e o ângulo ($\theta$) do pêndulo em cada passo de tempo.  
+
+As constantes físicas e parâmetros do sistema são definidos como:
+
+\begin{lstlisting}
+rl = 9.81d0      ! Comprimento do pêndulo
+g  = 9.81d0      ! Aceleração da gravidade
+m  = 1d0         ! Massa
+y  = 0.050d0     ! Coeficiente de amortecimento (Gamma)
+F0 = 0.50d0      ! Amplitude da força externa
+ome = 0.75d0     ! Frequência angular da força externa
+dt = 0.04d0      ! Passo temporal
+pi = acos(-1d0)  ! Valor de pi
+\end{lstlisting}
+
+\noindent
+As condições iniciais são fixadas como $\omega(0) = 0$ e 
+$\theta(0) = \pi/3$.  
+
+O método de Euler-Cromer é então aplicado dentro de um laço de 
+iterações que atualiza a velocidade angular e o ângulo a cada passo de 
+tempo.  
+A força externa e o termo de amortecimento são incluídos na equação de 
+movimento, resultando no seguinte esquema numérico:
+
+\begin{lstlisting}
+do i = 0, imax-1
+    F_ex = -y*w(i) + F0*sin(ome*i*dt)
+    w(i+1) = w(i) - (g/rl)*sin(th(i))*dt + F_ex*dt
+    th(i+1) = th(i) + w(i+1)*dt
+end do
+\end{lstlisting}
+
+\noindent
+O termo \texttt{F\_ex} representa a soma da força de amortecimento 
+($-y\omega$) e da força externa periódica 
+($F_0 \sin(\omega_{\text{ext}} t)$).  
+O uso do método de Euler-Cromer garante maior estabilidade e melhor 
+conservação de energia do sistema em comparação com o método de Euler 
+tradicional, especialmente em sistemas oscilatórios.  
+
+\subsection*{Saída dos resultados}
+
+Após o cálculo, os resultados da simulação são gravados no arquivo 
+\texttt{saida-1-12694394.txt}.  
+Cada linha do arquivo contém o tempo ($t = i \cdot \Delta t$), a velocidade 
+angular $\omega$ e o ângulo $\theta$, conforme o formato:
+
+\begin{lstlisting}
+7 format(F12.6,F12.6,F12.6)
+\end{lstlisting}
+
+\noindent
+Antes da escrita, o programa corrige o ângulo $\theta$ para mantê-lo dentro 
+do intervalo $[0, 2\pi]$, utilizando a verificação:
+
+\begin{lstlisting}
+if (th(i+1) .GT. 2*pi) then
+    th(i+1) = th(i+1) - 2*pi
+else if (th(i+1) .LT. 0) then
+    th(i+1) = th(i+1) + 2*pi
+end if
+\end{lstlisting}
+
+\noindent
+Por fim, o arquivo é fechado com o comando \texttt{close(1)}.  
+
+\subsection*{Resumo}
+
+Em resumo, o código realiza a integração numérica das equações de movimento 
+de um pêndulo forçado e amortecido pelo método de Euler-Cromer.  
+O programa permite estudar o comportamento dinâmico do sistema sob 
+diferentes condições de força e amortecimento, sendo útil para análises de 
+regimes oscilatórios, ressonância e comportamento caótico em pêndulos 
+não-lineares.
+
+
+\section*{Resultados}
+
+
+\begin{figure}[H]
+	\centering
+	\caption{Enunciado da Tarefa 1.}
+	\centering
+	\includemovie[autoplay]{12cm}{7cm}{videos/tarefa-A/saida-1-12694394.mp4}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa 1 - Video 1}
+\end{figure}

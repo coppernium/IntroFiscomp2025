@@ -1,0 +1,305 @@
+\chapter*{Tarefa - A}
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+        program main
+		implicit real*8 (a-h,o-z)
+		call euler_crommer()
+		call euler()
+		end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa 1 - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+subroutine euler_crommer()
+implicit real*8 (a-h,o-z)
+parameter (imax = 1e3)
+dimension w(0:imax), th(0:imax)
+
+g = 9.81d0
+m = 1d0
+rl = 9.81d0
+dt = 0.01d0
+pi = acos(-1d0)
+
+C       Condições Iniciais
+w(0) = 0d0
+th(0) = pi/6
+
+
+
+do i = 0, imax-1
+w(i+1) = w(i) - (g/rl)*sin(th(i))*dt
+th(i+1) = th(i) + w(i+1)*dt
+
+end do
+
+open(unit=1,file='saida-1-12694394.txt')
+do i = 0, imax
+
+! Trem do angulo
+if (th(i+1) .gt. 2*pi) then
+th(i+1) = th(i+1) - 2*pi
+else if (th(i+1) .lt. 0d0) then
+th(i+1) = th(i+1) + 2*pi
+end if
+
+write(1,*) i*dt, w(i), th(i)
+end do
+close(1)
+
+
+open(unit=2,file='saida-2-12694394.txt')
+do i = 0, imax
+E_kin = 0.5d0*m*((rl*w(i))**2) 
+E_pot = -m*g*rl*cos(th(i))
+
+
+write(2,*) i*dt, E_kin,E_pot,E_kin+E_pot
+end do
+close(2)
+
+end subroutine euler_crommer
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa 1 - Euler Cromer código}
+\end{figure}
+
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler.}
+\centering
+
+\begin{lstlisting}
+subroutine euler()
+implicit real*8 (a-h,o-z)
+parameter (imax = 1e4)
+dimension w(0:imax), th(0:imax)
+
+g = 9.81d0
+m = 1d0
+rl = 9.81d0
+dt = 0.01d0
+pi = acos(-1d0)
+
+C       Condições Iniciais
+w(0) = 0d0
+th(0) = pi/6d0
+
+
+
+do i = 0, imax-1
+w(i+1) = w(i) - (g/rl) * sin(th(i)) * dt
+th(i+1) = th(i) + w(i) * dt
+end do
+
+open(unit=3,file='saida-3-12694394.txt')
+do i = 0, imax
+
+! Trem dos angulos
+if (th(i+1) .gt. 2*pi) then
+th(i+1) = th(i+1) - 2*pi
+else if (th(i+1) .lt. 0d0) then
+th(i+1) = th(i+1) + 2*pi
+end if
+
+write(3,*) i*dt, w(i), th(i)
+end do
+close(3)
+
+
+open(unit=4,file='saida-4-12694394.txt')
+do i = 0, imax
+E_kin = 0.5d0*m*((rl*w(i))**2) 
+E_pot = -m*g*rl*cos(th(i))
+
+write(4,*) i*dt, E_kin,E_pot,E_kin+E_pot
+end do
+close(4)
+
+end subroutine euler
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa 1 - Derivadas}
+\end{figure}
+
+
+
+\newpage
+\section*{Descrição do código}
+
+O programa \texttt{main} tem como objetivo comparar dois métodos numéricos 
+de integração aplicados ao movimento de um pêndulo simples: o método de 
+\textit{Euler} e o método de \textit{Euler-Cromer}. Ambos são implementados 
+em subrotinas independentes e chamados a partir do programa principal.  
+
+\vspace*{1\baselineskip}
+\noindent
+No início do código, é utilizado o comando:
+
+\begin{lstlisting}
+	implicit real*8 (a-h,o-z)
+\end{lstlisting}
+
+\noindent
+que define todas as variáveis cujos nomes começam com as letras de 
+\textbf{a} a \textbf{h} e \textbf{o} a \textbf{z} como números reais de 
+dupla precisão.  
+Em seguida, o programa principal executa as duas subrotinas:
+
+\begin{lstlisting}
+	call euler_crommer()
+	call euler()
+\end{lstlisting}
+
+\noindent
+As duas subrotinas calculam numericamente a evolução temporal da velocidade 
+angular ($\omega$) e do ângulo ($\theta$) de um pêndulo simples, de 
+comprimento $r_l$ e massa $m$, sob ação da gravidade $g$.  
+
+\subsection*{Subrotina \texttt{euler\_crommer}}
+
+Na subrotina \texttt{euler\_crommer}, o número máximo de iterações é 
+definido por \texttt{imax = 1e3}, e são declarados os vetores 
+\texttt{w(0:imax)} e \texttt{th(0:imax)}, que armazenam respectivamente a 
+velocidade angular e o ângulo.  
+
+Os parâmetros físicos e o passo temporal são definidos como:
+
+\begin{lstlisting}
+	g = 9.81d0
+	m = 1d0
+	rl = 9.81d0
+	dt = 0.01d0
+	pi = acos(-1d0)
+\end{lstlisting}
+
+\noindent
+As condições iniciais são estabelecidas como $\omega(0) = 0$ e 
+$\theta(0) = \pi/6$.  
+O método de Euler-Cromer é então aplicado no laço:
+
+\begin{lstlisting}
+	do i = 0, imax-1
+	w(i+1) = w(i) - (g/rl)*th(i)*dt
+	th(i+1) = th(i) + w(i+1)*dt
+	end do
+\end{lstlisting}
+
+\noindent
+onde o valor atualizado da velocidade angular é utilizado imediatamente 
+no cálculo do ângulo, característica principal do método de Euler-Cromer, 
+que tende a conservar melhor a energia mecânica em sistemas oscilatórios.  
+
+Os resultados da evolução temporal de $\omega$ e $\theta$ são gravados no 
+arquivo \texttt{saida-1-12694394.txt}, enquanto as energias cinética, 
+potencial e total são salvas em \texttt{saida-2-12694394.txt}.  
+Antes da escrita, o código realiza uma correção para manter o ângulo 
+$\theta$ dentro do intervalo $[0, 2\pi]$.  
+
+As expressões utilizadas para as energias são:
+
+\begin{align*}
+	E_{\text{cin}} &= \frac{1}{2} m (r_l \, \omega)^2, \\
+	E_{\text{pot}} &= -m g r_l \cos(\theta).
+\end{align*}
+
+\noindent
+A soma dessas quantidades fornece a energia total 
+$E_{\text{tot}} = E_{\text{cin}} + E_{\text{pot}}$.
+
+\subsection*{Subrotina \texttt{euler}}
+
+A subrotina \texttt{euler} implementa o método de Euler simples, para fins 
+de comparação com o método anterior.  
+São utilizados os mesmos parâmetros físicos, mas com um número maior de 
+iterações (\texttt{imax = 1e4}), a fim de aumentar a resolução temporal.  
+
+O esquema numérico empregado é dado por:
+
+\begin{lstlisting}
+	do i = 0, imax-1
+	w(i+1) = w(i) - (g/rl)*th(i)*dt
+	th(i+1) = th(i) + w(i)*dt
+	end do
+\end{lstlisting}
+
+\noindent
+Diferentemente do método de Euler-Cromer, aqui o novo valor de $\theta$ é 
+calculado usando a velocidade \textit{anterior} $w(i)$, o que leva a uma 
+maior variação da energia total ao longo do tempo.  
+
+Os resultados para $\omega$ e $\theta$ são gravados no arquivo 
+\texttt{saida-3-12694394.txt}, e as energias correspondentes em 
+\texttt{saida-4-12694394.txt}.  
+
+Assim como na subrotina anterior, é aplicado o ajuste de periodicidade para 
+o ângulo e são calculadas as energias cinética, potencial e total com as 
+mesmas expressões.  
+
+\subsection*{Resumo}
+
+Em síntese, o código compara numericamente os métodos de Euler e 
+Euler-Cromer na simulação de um pêndulo simples, permitindo observar 
+diferenças na conservação da energia ao longo do tempo.  
+Cada método gera dois arquivos de saída: um contendo os parâmetros 
+dinâmicos ($\omega$ e $\theta$) e outro contendo as energias calculadas em 
+cada instante.
+
+
+\section*{Resultados}
+
+
+\begin{figure}[H]
+	\centering
+	\caption{Video simulação do pendulo.}
+	\centering
+	\includemovie[autoplay]{12cm}{7cm}{videos/tarefa-A/saida-1-12694394.mp4}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa 1 - Video 1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Energia método Euler-Cromer}
+\centering
+\includegraphics[width=16cm]{images/tarefa-A/fig1.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa A - Resultado energia Euler-Cromer}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Energia método Euler}
+\centering
+\includegraphics[width=16cm]{images/tarefa-A/fig2.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa A - Resultado energia Euler}
+\end{figure}
