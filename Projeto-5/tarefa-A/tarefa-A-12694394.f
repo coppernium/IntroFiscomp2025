@@ -1,54 +1,50 @@
         program main
+        parameter (imax=2e4)
         implicit real*8 (a-h,o-z)
-        call calc2()
-        end program main
+        dimension x(-1:imax),y(-1:imax)
 
-        subroutine calc()
-        implicit real*8(a-h,o-z)
-        parameter (imax = 1e4)
-        dimension x(-1:imax),y(-1:imax),r(0:imax)
-        
-        ! Constantes
+C   Constantes
         pi = acos(-1d0)
-        Gm = 4*pi*pi
-        r0 = 1d0
-        ! Parâmetros
-        dt = 0.01d0
-        x(0) = 0d0
+        dt = 0.1d0/365d0
+        GM = 4*pi*pi
+
+C   Valores iniciais
+        x(0) = 1d0
         y(0) = 0d0
-        r(0) = 1d0
-        vx0 = 0d0
-        vy0 = 2d0
+        vx = 0d0
+        vy = 2.0d0 * pi
 
-        x(-1) = -vx0*dt + x(0) 
-        y(-1) = -vy0*dt + y(0)
+C ----- Ace inicial
+        r = sqrt(x(0)**2 + y(0)**2)
+        ax = -GM*x(0)/r**3
+        ay = -GM*y(0)/r**3
 
+C ----- Pos anterior via Taylor reverso
+        x(-1) = x(0) - vx*dt + 0.5d0*ax*dt*dt
+        y(-1) = y(0) - vy*dt + 0.5d0*ay*dt*dt
+
+
+C   Cálculo
         do i = 0,imax-1
-            write(*,*) r(i)
-
-            ax = Gm*x(i)/r(i)**3
-            x(i+1) = 2*x(i) - x(i-1) + ax*dt*dt
-
-            ay = Gm*y(i)/r(i)**3
-            y(i+1) = 2*y(i) - y(i-1) + ay*dt*dt
+        r = sqrt((x(i)**2) + (y(i)**2))
         
-            r(i+1) = sqrt(x(i)**2 + y(i)**2)
+        ax = - GM*x(i)/(r**3)
+        ay = - GM*y(i)/(r**3)
+        
+        x(i+1) = 2d0*x(i) - x(i-1) + ax*dt*dt
+        y(i+1) = 2d0*y(i) - y(i-1) + ay*dt*dt
+
 
         end do
 
-        ! Salva os dados
-
-        open(unit=1,file='saida-1-12694394.txt')
-        
-        write(1,3)
+C   Salva
+        open(unit=1,file='saida.txt')
         do i = 0,imax
-            write(1,2) dt*i,x(i),y(i)
-        end do 
-2       format(F16.8,2(',',F16.8))
-3       format('t,x,y')
-        close(1)
-        end subroutine calc
 
-        subroutine calc2()
-        implicit real*8 (a-h,o-z)
-        end subroutine calc2
+        write(1,2) dt*i,x(i),y(i)
+
+        end do
+2       format(F16.8,2(",",F16.8))
+        close(1)
+
+        end program main
