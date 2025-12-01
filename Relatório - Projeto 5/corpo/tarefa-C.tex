@@ -1,0 +1,273 @@
+\chapter*{Tarefa - C}
+
+\section*{Enunciado}
+
+\begin{figure}[H]
+\centering
+\caption{Enunciado da Tarefa C.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-C/enunciado-tarefaC.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa A - Enunciado}
+\end{figure}
+
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+        program main
+        call euler_crommer()
+        end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Implementação do método de Euler-Cromer.}
+\centering
+
+\begin{lstlisting}
+
+        subroutine euler_crommer()
+            parameter(imax=(3*1e3))
+            dimension w1(0:imax), th1(0:imax)
+            dimension w2(0:imax), th2(0:imax)
+
+C       Parametros
+        g = 9.81e0
+        rl = 9.81e0
+        rm = 1e0
+        pi = acos(-1e0)
+        dt = 0.04e0
+        ! Parametros da força
+        F0_1 = 0.5e0
+        F0_2 = 0.5e0
+        ome_1 = 0.75e0
+        ome_2 = 0.75e0
+        y_1 = 0.05e0
+        y_2 = 0.05e0
+
+C       Condições iniciais
+        ! Velocidades angulares
+        w1(0) = 0
+        w2(0) = 0
+        ! Angulo inicial
+        th1(0) = 1e0
+        th2(0) = 1e0 + 0.001e0
+
+C       Cálculo
+        do i = 0,imax-1
+            F1 = - y_1*w1(i) + F0_1*sin(ome_1*i*dt)
+            F2 = - y_2*w2(i) + F0_2*sin(ome_2*i*dt)
+
+            w1(i+1) = w1(i) - (g/rl)*sin(th1(i))*dt + F1*dt
+            w2(i+1) = w2(i) - (g/rl)*sin(th2(i))*dt + F2*dt
+
+            th1(i+1) = th1(i) + w1(i+1)*dt
+            th2(i+1) = th2(i) + w2(i+1)*dt
+        end do
+
+C       Salva os resultados
+        open(unit=1,file='saida-2-12694394.txt')
+        write(1,3)
+        do i = 0,imax
+        if (th1(i+1) .GT. 2e0*pi) then
+            th1(i+1) = th1(i+1) - 2e0*pi
+        else if (th1(i+1) .LT. 0e0) then
+            th1(i+1) = th1(i+1) + 2e0*pi
+        end if
+
+        if (th2(i+1) .GT. 2e0*pi) then
+            th2(i+1) = th2(i+1) - 2e0*pi
+        else if (th2(i+1) .LT. 0e0) then
+            th2(i+1) = th2(i+1) + 2e0*pi
+        end if
+
+            r1 = th1(i)
+            r2 = th2(i)
+            write(1,7) dt*i,w1(i),r1,w2(i),r2,r2-r1
+        end do
+3       format('temp,omega1,theta1,omega2,theta2,theta2-theta1')
+7       format(5(F12.6,','),F12.6)
+        close(1)
+        end subroutine euler_crommer
+
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - Euler Cromer código}
+\end{figure}
+
+
+
+\section*{Descrição do código}
+
+O programa \texttt{main} tem como objetivo comparar a evolução temporal de 
+dois pêndulos simples sujeitos a atrito viscoso e a uma força externa 
+periódica, utilizando o método numérico de \textit{Euler-Cromer}.  
+A simulação busca observar como pequenas variações nas condições iniciais 
+podem gerar diferenças significativas no comportamento do sistema, 
+caracterizando um regime caótico.  
+
+\vspace*{1\baselineskip}
+\noindent
+O cálculo principal é realizado na subrotina \texttt{euler\_crommer}, 
+chamada diretamente pelo programa principal.  
+
+\subsection*{Parâmetros e variáveis}
+
+Na subrotina \texttt{euler\_crommer}, é definido o número máximo de 
+iterações \texttt{imax = 3×10\textsuperscript{3}} e são criados quatro 
+vetores: \texttt{w1}, \texttt{th1}, \texttt{w2} e \texttt{th2}, que 
+representam respectivamente as velocidades angulares ($\omega$) e ângulos 
+($\theta$) dos dois pêndulos.  
+
+As constantes físicas e os parâmetros da força externa são definidos como:
+
+\begin{lstlisting}
+g  = 9.81e0       ! Aceleração da gravidade
+rl = 9.81e0       ! Comprimento do pêndulo
+rm = 1e0          ! Massa
+pi = acos(-1e0)   ! Valor de pi
+dt = 0.04e0       ! Passo temporal
+
+! Parâmetros da força externa
+F0_1 = 0.5e0      ! Amplitude da força (pêndulo 1)
+F0_2 = 0.5e0      ! Amplitude da força (pêndulo 2)
+ome_1 = 0.75e0    ! Frequência da força (pêndulo 1)
+ome_2 = 0.75e0    ! Frequência da força (pêndulo 2)
+y_1 = 0.05e0      ! Amortecimento (pêndulo 1)
+y_2 = 0.05e0      ! Amortecimento (pêndulo 2)
+\end{lstlisting}
+
+\noindent
+Os dois pêndulos são idênticos em todos os parâmetros físicos, 
+diferindo apenas nas condições iniciais dos ângulos.  
+Ambos começam com velocidade angular nula, mas o segundo pêndulo possui um 
+pequeno desvio inicial de $0{,}001$ radiano:
+
+\begin{lstlisting}
+w1(0) = 0
+w2(0) = 0
+th1(0) = 1.0
+th2(0) = 1.0 + 0.001
+\end{lstlisting}
+
+\subsection*{Integração pelo método de Euler-Cromer}
+
+O laço principal da simulação executa \texttt{imax} iterações, aplicando o 
+método de Euler-Cromer para calcular a evolução temporal dos ângulos e 
+velocidades angulares.  
+A cada passo, são calculadas as forças efetivas sobre os dois pêndulos, 
+compostas pelo amortecimento e pela força externa periódica:
+
+\begin{lstlisting}
+F1 = - y_1*w1(i) + F0_1*sin(ome_1*i*dt)
+F2 = - y_2*w2(i) + F0_2*sin(ome_2*i*dt)
+\end{lstlisting}
+
+\noindent
+Em seguida, atualizam-se as velocidades e ângulos segundo:
+
+\begin{lstlisting}
+w1(i+1) = w1(i) - (g/rl)*sin(th1(i))*dt + F1*dt
+w2(i+1) = w2(i) - (g/rl)*sin(th2(i))*dt + F2*dt
+
+th1(i+1) = th1(i) + w1(i+1)*dt
+th2(i+1) = th2(i) + w2(i+1)*dt
+\end{lstlisting}
+
+\noindent
+O método de Euler-Cromer utiliza a nova velocidade angular 
+($\omega_{i+1}$) no cálculo da posição angular ($\theta_{i+1}$), o que 
+resulta em maior estabilidade numérica para sistemas oscilatórios.  
+
+\subsection*{Armazenamento dos resultados}
+
+Após o cálculo, os resultados são gravados no arquivo 
+\texttt{saida-2-12694394.txt}.  
+Antes da gravação, é feita a correção do ângulo $\theta$ para garantir que 
+permaneça dentro do intervalo $[0, 2\pi]$, evitando o acúmulo de voltas 
+excedentes.  
+Cada linha do arquivo contém:
+
+\begin{itemize}
+    \item o tempo ($t = i \cdot \Delta t$),
+    \item a velocidade angular e o ângulo do primeiro pêndulo,
+    \item a velocidade angular e o ângulo do segundo pêndulo,
+    \item e a diferença angular $\Delta\theta = \theta_2 - \theta_1$.
+\end{itemize}
+
+\noindent
+O formato de escrita utilizado é:
+
+\begin{lstlisting}
+7 format(5(F12.6,','),F12.6)
+\end{lstlisting}
+
+\noindent
+e o arquivo é encerrado com o comando \texttt{close(1)}.  
+
+\subsection*{Resumo}
+
+Em síntese, o código realiza a simulação de dois pêndulos forçados e 
+amortecidos com condições iniciais ligeiramente diferentes, permitindo 
+analisar a divergência de trajetórias ao longo do tempo.  
+Essa abordagem é típica em estudos de sistemas dinâmicos caóticos, 
+onde pequenas perturbações nas condições iniciais levam a comportamentos 
+macroscopicamente distintos, mesmo sob as mesmas leis de movimento.
+
+\section*{Resultados}
+Estimativa do coeficiente de Liapunov: 9.2039e-02
+
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-C/saida-1-12694394_linear.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - Resultado 1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-C/saida-1-12694394_semilog.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - Resultado 2}
+\end{figure}
+
+Estimativa do coeficiente de Liapunov: 1.0632e-01
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-C/saida-2-12694394_linear.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - Resultado 3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\caption{Resultado obtidos.}
+\centering
+\includegraphics[width=16cm]{images/tarefa-C/saida-2-12694394_semilog.png}
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa C - Resultado 4}
+\end{figure}

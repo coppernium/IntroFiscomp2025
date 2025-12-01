@@ -1,0 +1,339 @@
+\chapter*{Tarefa - A}
+
+\section*{Código}
+
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+\centering
+\caption{Função principal do código.}
+\centering
+
+\begin{lstlisting}
+	     program main
+		implicit real*8 (a-h,o-z)
+		a = 39.53d0
+		call calc(a)
+		end program main
+\end{lstlisting}
+
+\caption*{Fonte: Compilado pelo Autor.}
+\label{fig:tarefa 1 - função principal do código}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+\begin{figure}[H]
+	\centering
+	\caption{Subrotina que realiza os cálculos, para um certo valor de a.}
+	\centering
+	
+	\begin{lstlisting}
+
+subroutine calc(a)
+parameter (imax=1e5)
+implicit real*8 (a-h,o-z)
+dimension x(-1:imax),y(-1:imax)
+
+C   Constantes
+pi = acos(-1d0)
+dt = 10d0/365d0
+GM = 4*pi*pi
+
+C   Val in
+x(0) = 1d0*a !Distancia em UA
+y(0) = 0d0
+vx = 0d0
+vy = 2.0d0*pi/sqrt(a)
+
+
+C  x(-1) e y(-1)
+x(-1) = x(0) - vx*dt
+y(-1) = y(0) - vy*dt 
+
+C       Salva para lei de Kepler
+io = 0d0 !Variavel de segurança para pegar apenas a primeira volta
+
+	\end{lstlisting}
+	
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa 1 - Subrotina}
+\end{figure}
+
+\vspace*{1\baselineskip}
+
+
+\begin{figure}[H]
+	\centering
+	\caption{Subrotina que realiza os cálculos, para um certo valor de a.}
+	\centering
+	
+	\begin{lstlisting}
+		C Calc
+		do i = 0,imax-1
+		r = sqrt((x(i)**2) + (y(i)**2))
+		
+		ax = - GM*x(i)/(r**3)
+		ay = - GM*y(i)/(r**3)
+		
+		x(i+1) = 2d0*x(i) - x(i-1) + ax*dt*dt
+		y(i+1) = 2d0*y(i) - y(i-1) + ay*dt*dt
+		
+		theta_new = atan2(y(i+1), x(i+1))
+		if ((theta_old .LT. 0d0) .and. (theta_new .GE. 0d0)) then
+		if (io .GT. 0d0) then
+		goto 7
+		end if
+		
+		if (i*dt .GT. 5d0*dt) then      ! para n detectar o comeco
+		periodo = i * dt
+		write(*,3) periodo, r, (periodo**2)/(r**3)
+		3                       format(F12.4,2(",",F12.4))
+		end if
+		io = 1d0
+		end if
+		
+		theta_old = theta_new
+		7       continue
+		end do
+		
+		C   Salva
+		open(unit=1,file='saida-2-12694394.txt')
+		do i = 0,imax
+		
+		write(1,2) dt*i,x(i),y(i)
+		
+		end do
+		2       format(F16.8,2(",",F16.8))
+		close(1)
+		
+		
+		end subroutine calc
+	\end{lstlisting}
+	
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa 1 - Subrotina parte 2}
+\end{figure}
+
+\vspace*{1\baselineskip}
+\newpage
+\section*{Descrição do código}
+
+O programa \texttt{main} tem como finalidade calcular numericamente a 
+órbita de um corpo sob atração gravitacional central, utilizando um método 
+de diferenças finitas de segunda ordem para integrar as equações do movimento.  
+
+\noindent
+Inicialmente, o programa utiliza o comando:
+
+\begin{lstlisting}
+	implicit real*8 (a-h,o-z)
+\end{lstlisting}
+
+\noindent
+que define todas as variáveis cujos nomes começam com as letras de 
+\textbf{a} a \textbf{h} e \textbf{o} a \textbf{z} como números reais de 
+dupla precisão.  
+
+\noindent
+Em seguida, o programa principal define o parâmetro:
+
+\begin{lstlisting}
+	a = 39.53d0
+\end{lstlisting}
+
+\noindent
+que representa a distância inicial em unidades astronômicas (UA), podendo 
+ser alterada conforme o sistema orbital analisado. Por fim, o programa chama 
+a subrotina responsável pelos cálculos:
+
+\begin{lstlisting}
+	call calc(a)
+\end{lstlisting}
+
+\subsection*{Subrotina \texttt{calc}}
+
+A subrotina \texttt{calc} recebe o parâmetro \texttt{a} e define o número 
+máximo de iterações como:
+
+\begin{lstlisting}
+	parameter (imax = 1e5)
+\end{lstlisting}
+
+\noindent
+Os vetores \texttt{x(-1:imax)} e \texttt{y(-1:imax)} armazenam as posições 
+cartesianas do corpo em cada passo da simulação.
+
+\vspace{1\baselineskip}
+\noindent
+As constantes físicas e parâmetros numéricos são definidos como:
+
+\begin{lstlisting}
+	pi = acos(-1d0)
+	dt = 10d0/365d0
+	GM = 4*pi*pi
+\end{lstlisting}
+
+\noindent
+onde \texttt{dt} representa um passo temporal equivalente a 10 dias, e 
+\texttt{GM} é escrito em unidades astronômicas e anos, permitindo o uso de 
+órbitas keplerianas sem necessidade de conversão adicional.
+
+\subsection*{Condições iniciais}
+
+As condições iniciais de posição são definidas por:
+
+\[
+x(0) = a, \qquad y(0) = 0,
+\]
+
+\noindent
+enquanto a velocidade inicial é puramente tangencial:
+
+\[
+v_x = 0, \qquad 
+v_y = \frac{2\pi}{\sqrt{a}}.
+\]
+
+\noindent
+Para o método numérico utilizado, é necessário especificar também os valores 
+de \texttt{x(-1)} e \texttt{y(-1)}, estimados como:
+
+\begin{lstlisting}
+	x(-1) = x(0) - vx*dt
+	y(-1) = y(0) - vy*dt
+\end{lstlisting}
+
+\noindent
+Esses valores simulam o instante anterior ao início da integração, 
+permitindo o uso do método de segunda ordem.
+
+\subsection*{Método numérico}
+
+A subrotina emprega um método de integração do tipo Verlet, dado por:
+
+\[
+x_{i+1} = 2x_i - x_{i-1} + a_x\, dt^2,
+\qquad
+y_{i+1} = 2y_i - y_{i-1} + a_y\, dt^2,
+\]
+
+\noindent
+onde as acelerações são calculadas pela lei da gravitação universal:
+
+\[
+a_x = -\frac{GM\,x}{r^3}, \qquad
+a_y = -\frac{GM\,y}{r^3},
+\qquad
+r = \sqrt{x^2 + y^2}.
+\]
+
+\noindent
+Esse método é adequado para sistemas orbitais, pois apresenta boa 
+conservação da energia mecânica.
+
+\subsection*{Cálculo do período orbital}
+
+O código realiza o monitoramento do ângulo polar:
+
+\[
+\theta = \mathrm{atan2}(y, x)
+\]
+
+\noindent
+para identificar quando o corpo cruza novamente o eixo positivo do eixo \(x\).  
+A condição:
+
+\[
+\theta_{\text{old}} < 0 \quad \text{e} \quad \theta_{\text{new}} \ge 0
+\]
+
+\noindent
+indica uma passagem completa. Após um intervalo de segurança para evitar a 
+detecção do próprio início do movimento, o período orbital é calculado como:
+
+\[
+T = i \cdot dt.
+\]
+
+\noindent
+O programa também imprime o valor de:
+
+\[
+\frac{T^2}{r^3},
+\]
+
+\noindent
+permitindo verificar numericamente a terceira lei de Kepler.
+
+\subsection*{Gravação dos resultados}
+
+Ao final da simulação, os valores de tempo e posição são gravados no arquivo:
+
+\begin{center}
+	\texttt{saida-2-12694394.txt}
+\end{center}
+
+\noindent
+no formato:
+
+\[
+t,\; x(t),\; y(t).
+\]
+
+\noindent
+
+\subsection*{Resumo}
+
+O código implementa:
+
+\begin{itemize}
+	\item um integrador de segunda ordem do tipo Verlet;
+	\item condições iniciais ajustáveis via parâmetro \texttt{a};
+	\item determinação automática do período orbital;
+	\item verificação da terceira lei de Kepler;
+	\item armazenamento da trajetória completa em arquivo.
+\end{itemize}
+
+\noindent
+Trata-se de uma implementação eficiente para o estudo de órbitas keplerianas 
+e propriedades fundamentais do movimento sob gravitação central.
+
+\subsection*{Resumo}
+
+Em síntese, o código compara numericamente os métodos de Euler e 
+Euler-Cromer na simulação de um pêndulo simples, permitindo observar 
+diferenças na conservação da energia ao longo do tempo.  
+Cada método gera dois arquivos de saída: um contendo os parâmetros 
+dinâmicos ($\omega$ e $\theta$) e outro contendo as energias calculadas em 
+cada instante.
+
+
+\section*{Resultados}
+
+
+\begin{table}[h!]
+	\centering
+	\caption{Período orbital, raio e razão $T^2/a^3$ dos planetas.}
+	\label{table:kepler}
+	\begin{NiceTabular}{c|ccc}[hvlines, columns-width=3cm]
+		\CodeBefore
+		\rowcolor{cyan}{1}
+		\rowcolors{2}{cyan!25}{cyan!15}
+		\Body
+		\RowStyle[color=white, bold]{}
+		Planeta & Período (anos) & Raio (UA) & $T^2/a^3$ \\
+		Mercúrio & 0.2436 & 0.3900 & 1.0001 \\
+		Vênus & 0.6107 & 0.7200 & 0.9992 \\
+		Terra & 1.0000 & 1.0000 & 1.0000 \\
+		Marte & 1.8740 & 1.5200 & 1.0000 \\
+		Júpiter & 11.8578 & 5.2000 & 1.0000 \\
+		Saturno & 28.0871 & 9.2400 & 1.0000 \\
+		Urano & 84.0548 & 19.1900 & 0.9998 \\
+		Netuno & 164.7945 & 30.0600 & 0.9998 \\
+		Plutão & 248.5205 & 39.5300 & 0.9999 \\
+	\end{NiceTabular}
+	\vspace*{1\baselineskip}
+	\caption*{Fonte: Compilado pelo Autor}
+\end{table}
