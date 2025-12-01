@@ -118,35 +118,34 @@ io = 0d0 !Variavel de segurança para pegar apenas a primeira volta
 
 \vspace*{1\baselineskip}
 \newpage
+
 \section*{Descrição do código}
 
 O programa \texttt{main} tem como finalidade calcular numericamente a 
-órbita de um corpo sob atração gravitacional central, utilizando um método 
-de diferenças finitas de segunda ordem para integrar as equações do movimento.  
+órbita de um corpo sob atração gravitacional central, utilizando um 
+integrador de segunda ordem para resolver as equações do movimento.  
 
 \noindent
-Inicialmente, o programa utiliza o comando:
+Ele utiliza o comando:
 
 \begin{lstlisting}
 	implicit real*8 (a-h,o-z)
 \end{lstlisting}
 
 \noindent
-que define todas as variáveis cujos nomes começam com as letras de 
-\textbf{a} a \textbf{h} e \textbf{o} a \textbf{z} como números reais de 
-dupla precisão.  
+o que define como números reais de dupla precisão todas as variáveis cujos 
+nomes se iniciam com as letras \textbf{a}--\textbf{h} e \textbf{o}--\textbf{z}.  
 
 \noindent
 Em seguida, o programa principal define o parâmetro:
 
 \begin{lstlisting}
-	a = 39.53d0
+	a = 1d0
 \end{lstlisting}
 
 \noindent
-que representa a distância inicial em unidades astronômicas (UA), podendo 
-ser alterada conforme o sistema orbital analisado. Por fim, o programa chama 
-a subrotina responsável pelos cálculos:
+que representa o raio inicial da órbita em unidades astronômicas (UA). 
+Por fim, chama a subrotina responsável pelos cálculos:
 
 \begin{lstlisting}
 	call calc(a)
@@ -158,47 +157,49 @@ A subrotina \texttt{calc} recebe o parâmetro \texttt{a} e define o número
 máximo de iterações como:
 
 \begin{lstlisting}
-	parameter (imax = 1e5)
+	parameter (imax = 1e4)
 \end{lstlisting}
 
 \noindent
 Os vetores \texttt{x(-1:imax)} e \texttt{y(-1:imax)} armazenam as posições 
-cartesianas do corpo em cada passo da simulação.
+cartesianas do corpo ao longo da integração.
 
 \vspace{1\baselineskip}
 \noindent
-As constantes físicas e parâmetros numéricos são definidos como:
+As constantes físicas utilizadas são:
 
 \begin{lstlisting}
 	pi = acos(-1d0)
-	dt = 10d0/365d0
+	dt = 1d0/365d0
 	GM = 4*pi*pi
+	ec = 0.5d0
 \end{lstlisting}
 
 \noindent
-onde \texttt{dt} representa um passo temporal equivalente a 10 dias, e 
-\texttt{GM} é escrito em unidades astronômicas e anos, permitindo o uso de 
-órbitas keplerianas sem necessidade de conversão adicional.
+O passo temporal \texttt{dt} corresponde a um dia em unidades de ano, e 
+\texttt{GM} é expresso de modo que sistemas keplerianos possam ser simulados 
+em unidades astronômicas sem necessidade de conversões adicionais.  
+O parâmetro \texttt{ec} representa o fator de controle da velocidade inicial, 
+permitindo estudar órbitas com diferentes excentricidades.
 
 \subsection*{Condições iniciais}
 
-As condições iniciais de posição são definidas por:
+As condições iniciais de posição são definidas como:
 
-\[
-x(0) = a, \qquad y(0) = 0,
-\]
-
-\noindent
-enquanto a velocidade inicial é puramente tangencial:
-
-\[
-v_x = 0, \qquad 
-v_y = \frac{2\pi}{\sqrt{a}}.
-\]
+\begin{equation}
+	x(0) = a, \qquad y(0) = 0
+\end{equation}
 
 \noindent
-Para o método numérico utilizado, é necessário especificar também os valores 
-de \texttt{x(-1)} e \texttt{y(-1)}, estimados como:
+e a velocidade inicial é exclusivamente tangencial:
+
+\begin{equation}
+	v_x = 0, \qquad v_y = ec \,\frac{2\pi}{\sqrt{a}}
+\end{equation}
+
+\noindent
+Além disso, como o método numérico utilizado requer um passo anterior, os 
+valores de \texttt{x(-1)} e \texttt{y(-1)} são estimados por:
 
 \begin{lstlisting}
 	x(-1) = x(0) - vx*dt
@@ -206,70 +207,89 @@ de \texttt{x(-1)} e \texttt{y(-1)}, estimados como:
 \end{lstlisting}
 
 \noindent
-Esses valores simulam o instante anterior ao início da integração, 
-permitindo o uso do método de segunda ordem.
+Esses valores representam uma aproximação da posição um passo antes do 
+instante inicial.
 
 \subsection*{Método numérico}
 
-A subrotina emprega um método de integração do tipo Verlet, dado por:
+A integração é realizada por um método do tipo Verlet, dado por:
 
-\[
-x_{i+1} = 2x_i - x_{i-1} + a_x\, dt^2,
-\qquad
-y_{i+1} = 2y_i - y_{i-1} + a_y\, dt^2,
-\]
-
-\noindent
-onde as acelerações são calculadas pela lei da gravitação universal:
-
-\[
-a_x = -\frac{GM\,x}{r^3}, \qquad
-a_y = -\frac{GM\,y}{r^3},
-\qquad
-r = \sqrt{x^2 + y^2}.
-\]
+\begin{equation}
+	x_{i+1} = 2x_i - x_{i-1} + a_x\, dt^2,
+	\qquad
+	y_{i+1} = 2y_i - y_{i-1} + a_y\, dt^2
+\end{equation}
 
 \noindent
-Esse método é adequado para sistemas orbitais, pois apresenta boa 
-conservação da energia mecânica.
+com as acelerações calculadas pela lei da gravitação universal:
+
+\begin{equation}
+	a_x = -\frac{GM x}{r^3}, \qquad
+	a_y = -\frac{GM y}{r^3}, \qquad
+	r = \sqrt{x^2 + y^2}
+\end{equation}
+
+\noindent
+Esse método é conhecido por sua boa conservação da energia mecânica ao longo 
+do tempo, característica particularmente útil em simulações orbitais.
+
+\subsection*{Cálculo da área varrida}
+
+Em cada passo da simulação, a área varrida pelo vetor de posição é 
+aproximada pela fórmula:
+
+\begin{equation}
+	A_i = \frac{1}{2} \left| x_i\,y_{i+1} - x_{i+1}\,y_i \right|
+\end{equation}
+
+\noindent
+e é registrada no arquivo:
+
+\begin{center}
+	\texttt{saida-1-12694394.txt}
+\end{center}
+
+\noindent
+Esse cálculo permite verificar a segunda lei de Kepler, que estabelece que 
+a área varrida por unidade de tempo permanece constante.
 
 \subsection*{Cálculo do período orbital}
 
-O código realiza o monitoramento do ângulo polar:
+Para determinar o período, o código monitora o ângulo polar:
 
-\[
-\theta = \mathrm{atan2}(y, x)
-\]
-
-\noindent
-para identificar quando o corpo cruza novamente o eixo positivo do eixo \(x\).  
-A condição:
-
-\[
-\theta_{\text{old}} < 0 \quad \text{e} \quad \theta_{\text{new}} \ge 0
-\]
+\begin{equation}
+	\theta = \mathrm{atan2}(y, x)
+\end{equation}
 
 \noindent
-indica uma passagem completa. Após um intervalo de segurança para evitar a 
-detecção do próprio início do movimento, o período orbital é calculado como:
+e identifica quando o corpo cruza novamente o eixo \(x\) no semi-eixo 
+positivo. A condição usada é:
 
-\[
-T = i \cdot dt.
-\]
+\begin{equation}
+	\theta_{\text{old}} < 0
+	\quad \text{e} \quad
+	\theta_{\text{new}} \ge 0
+\end{equation}
+
+Após ignorar as primeiras iterações, que poderiam detectar o instante 
+inicial, o período é calculado por:
+
+\begin{equation}
+	T = i\,dt
+\end{equation}
 
 \noindent
-O programa também imprime o valor de:
+Além disso, são impressos o raio e a razão:
 
-\[
-\frac{T^2}{r^3},
-\]
+\begin{equation}
+	\frac{T^2}{r^3}
+\end{equation}
 
-\noindent
 permitindo verificar numericamente a terceira lei de Kepler.
 
-\subsection*{Gravação dos resultados}
+\subsection*{Gravação da trajetória}
 
-Ao final da simulação, os valores de tempo e posição são gravados no arquivo:
+Ao final da simulação, os valores de tempo e posição são armazenados em:
 
 \begin{center}
 	\texttt{saida-2-12694394.txt}
@@ -278,11 +298,9 @@ Ao final da simulação, os valores de tempo e posição são gravados no arquiv
 \noindent
 no formato:
 
-\[
-t,\; x(t),\; y(t).
-\]
-
-\noindent
+\begin{equation}
+	t,\; x(t),\; y(t)
+\end{equation}
 
 \subsection*{Resumo}
 

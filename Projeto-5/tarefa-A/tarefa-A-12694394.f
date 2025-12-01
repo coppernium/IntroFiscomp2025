@@ -1,32 +1,33 @@
         program main
         implicit real*8 (a-h,o-z)
-        a = 39.53d0
+        a = 1d0
         call calc(a)
         end program main
 
 
         subroutine calc(a)
-        parameter (imax=1e5)
+        parameter (imax=1e4)
         implicit real*8 (a-h,o-z)
         dimension x(-1:imax),y(-1:imax)
 
 C   Constantes
         pi = acos(-1d0)
-        dt = 10d0/365d0
+        dt = 1d0/365d0
         GM = 4*pi*pi
-
+        ec = 0.5d0 !Ecentri
 C   Val in
         x(0) = 1d0*a !Distancia em UA
         y(0) = 0d0
         vx = 0d0
-        vy = 2.0d0*pi/sqrt(a)
+        vy = ec*2.0d0*pi/sqrt(a)
 
 
 C  x(-1) e y(-1)
         x(-1) = x(0) - vx*dt
         y(-1) = y(0) - vy*dt 
 
-C       Salva para lei de Kepler
+C       Salva os dados leis de Kepler
+        open(unit=12,file='saida-1-12694394.txt')
         io = 0d0 !Variavel de segurança para pegar apenas a primeira volta
 
 C   Calc
@@ -39,6 +40,16 @@ C   Calc
         x(i+1) = 2d0*x(i) - x(i-1) + ax*dt*dt
         y(i+1) = 2d0*y(i) - y(i-1) + ay*dt*dt
 
+        ! Uso para encotnrar a area
+        if (i .GT. 0) then
+                area = 0.5d0 * abs( x(i)*y(i+1) - x(i+1)*y(i) )
+                write(12,11) i*dt, area
+11       format(F16.8,",",F16.8)
+
+        end if
+
+
+        ! Parte que encontra o periodo e o raio
         theta_new = atan2(y(i+1), x(i+1))
         if ((theta_old .LT. 0d0) .and. (theta_new .GE. 0d0)) then
                 if (io .GT. 0d0) then
@@ -57,6 +68,7 @@ C   Calc
 7       continue
         end do
 
+        close(12)
 C   Salva
         open(unit=1,file='saida-2-12694394.txt')
         do i = 0,imax
