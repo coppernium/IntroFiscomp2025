@@ -186,14 +186,69 @@ regimes oscilatórios, ressonância e comportamento caótico em pêndulos
 não-lineares.
 
 
-\section*{Resultados}
+\section*{Resultados e Discussão}
 
 
-\begin{figure}[H]
-	\centering
-	\caption{Enunciado da Tarefa 1.}
-	\centering
-	\includemovie[autoplay]{12cm}{7cm}{videos/tarefa-A/saida-1-12694394.mp4}
-	\caption*{Fonte: Compilado pelo Autor.}
-	\label{fig:tarefa 1 - Video 1}
-\end{figure}
+\section*{Discussão dos Resultados}
+
+Nesta simulação computacional analisamos o movimento de três asteroides na região do Cinturão Principal, levando em conta apenas as interações gravitacionais com o Sol e com Júpiter. A presença de Júpiter é particularmente importante, pois o planeta possui massa suficientemente grande para perturbar órbitas próximas e modificar lentamente seus semieixos maiores, excentricidades e ângulos orbitais.
+
+Os três asteroides foram escolhidos com distâncias iniciais de 3{,}0 UA, 3{,}276 UA e 3{,}7 UA, valores próximos de regiões reais do cinturão. Os resultados mostram claramente que:
+
+\begin{itemize}
+	\item O asteroide mais externo (3{,}7 UA) mantém uma órbita aproximadamente estável e quase circular ao longo do tempo.
+	\item O asteroide intermediário (3{,}276 UA) apresenta perturbações moderadas, mas ainda preserva uma órbita aproximadamente regular.
+	\item O asteroide interno (3{,}0 UA), por outro lado, sofre variações mais fortes em sua órbita, especialmente na longitude, com pequenas oscilações que se tornam mais evidentes quando Júpiter passa próximo em sua órbita.
+\end{itemize}
+
+Essas diferenças de comportamento estão diretamente relacionadas ao fenômeno conhecido como \textbf{ressonâncias orbitais}, fundamentais para compreender a estrutura do cinturão de asteroides.
+
+\subsection*{Lacunas de Kirkwood}
+
+As \textbf{Lacunas de Kirkwood} são regiões do cinturão de asteroides onde praticamente não existem objetos. Elas foram descobertas pelo astrônomo Daniel Kirkwood no século XIX e correspondem a posições onde os asteroides entrariam em ressonância de período com Júpiter.
+
+Uma ressonância ocorre quando:
+
+\[
+\frac{T_{\text{ast}}}{T_J} = \frac{q}{p},
+\]
+
+com $p$ e $q$ inteiros pequenos.
+
+\noindent Alguns exemplos reais de ressonâncias e suas posições no cinturão:
+
+\begin{center}
+	\begin{tabular}{ccc}
+		\hline
+		\textbf{Ressonância} & \textbf{Distância (UA)} & \textbf{Efeito} \\
+		\hline
+		3:1 & 2.50 & Lacuna profunda \\
+		5:2 & 2.82 & Lacuna \\
+		7:3 & 2.96 & Lacuna \\
+		2:1 & 3.27 & Grande lacuna \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Quando um asteroide entra em uma destas ressonâncias:
+
+\begin{itemize}
+	\item recebe pequenos “empurrões” gravitacionais repetidos de Júpiter,
+	\item sua excentricidade cresce lentamente,
+	\item sua órbita se torna instável,
+	\item e eventualmente ele é ejetado daquela região.
+\end{itemize}
+
+\subsection*{Interpretação dos resultados obtidos}
+
+Na simulação realizada, observamos que:
+
+\begin{itemize}
+	\item O asteroide em \textbf{3.0 UA} está muito próximo da ressonância 7:3, por isso sofre perturbações mais intensas.
+	\item O asteroide em \textbf{3.276 UA} está praticamente na grande lacuna associada à ressonância 2:1, o que explica possíveis instabilidades mais fortes se a simulação for estendida por mais tempo.
+	\item O asteroide em \textbf{3.7 UA}, longe das principais ressonâncias, apresenta um movimento claramente mais estável ao longo da integração.
+\end{itemize}
+
+Assim, o comportamento observado nos gráficos e na animação está em total acordo com o que é previsto pela dinâmica orbital real e com o padrão das Lacunas de Kirkwood no cinturão principal. O estudo evidencia como perturbações gravitacionais sutis, mas repetidas ao longo de milhares de períodos orbitais, moldam a estrutura do cinturão e explicam por que certas regiões permanecem praticamente vazias enquanto outras mantêm grande população de corpos.
+
+
