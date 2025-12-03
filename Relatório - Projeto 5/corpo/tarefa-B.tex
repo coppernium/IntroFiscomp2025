@@ -1,193 +1,520 @@
 \chapter*{Tarefa - B}
 
-
 \section*{Código}
 
 
+% Bloco 1: Função Principal
+\begin{lstlisting}[caption={Função principal do código.}, label={lst:main-codigo}]
+	program main
+	implicit real*8 (a-h,o-z)
+	
+	call calc()
+	call calc2()
+	
+	end program main
+\end{lstlisting}
 \vspace*{1\baselineskip}
+
+% Bloco 2: Sub-rotina calc - Parte 1 (Declarações e Constantes)
+\begin{lstlisting}[caption={Implementação da subrotina \texttt{calc}: Declarações, constantes e condições iniciais (parte 1 de 3).}, label={lst:calc-part1}]
+	subroutine calc()
+	implicit real*8 (a-h,o-z)
+	parameter (imax=5e3)
+	
+	dimension x_t(-1:imax), y_t(-1:imax)
+	dimension x_j(-1:imax), y_j(-1:imax)
+	
+	C         Constantes
+	
+	pi = acos(-1d0)
+	dt = 1d0/365d0
+	
+	GM_S = 4d0*pi*pi
+	GM_J = GM_S * 0.0009543d0 * 1    ! multiplica a massa
+	GM_T = GM_S * 3.003d-6
+	
+	C
+	GM_S2 = GM_S + GM_J
+	
+	C         C.I.
+	
+	x_t(0) = 1d0
+	y_t(0) = 0d0
+	vx_t  = 0d0
+	vy_t  = 2d0*pi
+	
+	x_j(0) = 5.2d0
+	y_j(0) = 0d0
+	vx_j  = 0d0
+	vy_j  = 2d0*pi*5.2d0/11.86d0
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 3: Sub-rotina calc - Parte 2 (Iteração Negativa e Loop Principal)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc}: Interação negativa e loop principal de cálculo (parte 2 de 3).}, label={lst:calc-part2}]
+	C         Intereaçao negativa
+	x_t(-1) = x_t(0) - vx_t*dt
+	y_t(-1) = y_t(0) - vy_t*dt
+	
+	x_j(-1) = x_j(0) - vx_j*dt
+	y_j(-1) = y_j(0) - vy_j*dt
+	
+	C         Contas
+	do i = 0, imax-1
+	
+	C         Acel. Terra
+	r_ts = sqrt(x_t(i)**2 + y_t(i)**2)
+	r_tj = sqrt((x_t(i)-x_j(i))**2 + (y_t(i)-y_j(i))**2)
+	
+	ax_t = -GM_S*x_t(i)/(r_ts**3) - GM_J*(x_t(i)-x_j(i))/(r_tj**3)
+	ay_t = -GM_S*y_t(i)/(r_ts**3) - GM_J*(y_t(i)-y_j(i))/(r_tj**3)
+	
+	C         Acel jupiter
+	r_js = sqrt(x_j(i)**2 + y_j(i)**2)
+	
+	ax_j = -GM_S2*x_j(i)/(r_js**3)
+	ay_j = -GM_S2*y_j(i)/(r_js**3)
+	
+	C         atualiza os dados
+	x_t(i+1) = 2d0*x_t(i) - x_t(i-1) + ax_t*dt*dt
+	y_t(i+1) = 2d0*y_t(i) - y_t(i-1) + ay_t*dt*dt
+	
+	x_j(i+1) = 2d0*x_j(i) - x_j(i-1) + ax_j*dt*dt
+	y_j(i+1) = 2d0*y_j(i) - y_j(i-1) + ay_j*dt*dt
+	
+	end do
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 4: Sub-rotina calc - Parte 3 (Salvamento de Dados)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc}: Salvamento dos dados calculados em arquivo (parte 3 de 3).}, label={lst:calc-part3}]
+	C         Salva
+	
+	open(unit=1, file='saida_m_1.txt')
+	do i = 0, imax
+	write(1,2) dt*i, x_t(i), y_t(i), x_j(i), y_j(i)
+	end do
+	2       format(F16.8, 4(",",F16.8))
+	close(1)
+	
+	end subroutine calc
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 5: Sub-rotina calc2 - Parte 1 (Declarações e Constantes)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc2}: Declarações de variáveis e constantes (parte 1 de 4).}, label={lst:calc2-part1}]
+	subroutine calc2()
+	implicit real*8 (a-h,o-z)
+	parameter (imax=1e3)
+	
+	dimension xj(-1:imax), yj(-1:imax)
+	dimension xa1(-1:imax), ya1(-1:imax)
+	dimension xa2(-1:imax), ya2(-1:imax)
+	dimension xa3(-1:imax), ya3(-1:imax)
+	
+	C         Constantes
+	
+	pi    = acos(-1d0)
+	dt    = 1d0/365d0
+	
+	GM_S = 4d0*pi*pi
+	GM_J = GM_S * 0.0009543d0
+	GM_S2 = GM_S + GM_J !Isso é para jupiter sentir a mudamça de massa
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 6: Sub-rotina calc2 - Parte 2 (Condições Iniciais)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc2}: Condições iniciais para Júpiter e asteroides (parte 2 de 4).}, label={lst:calc2-part2}]
+	C         Cond Ini
+	
+	C         Jupiter
+	xj(0) = 5.2d0
+	yj(0) = 0d0
+	vxj   = 0d0
+	vyj   = 2d0*pi*5.2d0/11.86d0
+	
+	C         Asteroide 1
+	xa1(0) = 3.0d0
+	ya1(0) = 0d0
+	vxa1   = 0d0
+	vya1   = 3.628d0
+	
+	C         Asteroide 2
+	xa2(0) = 3.276d0
+	ya2(0) = 0d0
+	vxa2   = 0d0
+	vya2   = 3.471d0
+	C         Asteroide 3
+	xa3(0) = 3.700d0
+	ya3(0) = 0d0
+	vxa3   = 0d0
+	vya3   = 3.267d0
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 7: Sub-rotina calc2 - Parte 3 (Setup Verlet e Loop Principal)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc2}: Setup do método de Verlet e início do loop principal (parte 3 de 4).}, label={lst:calc2-part3}]
+	C         Setup do i-1 do verlat
+	
+	xj(-1) = xj(0) - vxj*dt
+	yj(-1) = yj(0) - vyj*dt
+	
+	xa1(-1) = xa1(0) - vxa1*dt
+	ya1(-1) = ya1(0) - vya1*dt
+	
+	xa2(-1) = xa2(0) - vxa2*dt
+	ya2(-1) = ya2(0) - vya2*dt
+	
+	xa3(-1) = xa3(0) - vxa3*dt
+	ya3(-1) = ya3(0) - vya3*dt
+	
+	C         Realiza as contas
+	do i = 0, imax-1
+	
+	C         Jupiter
+	rjs = sqrt(xj(i)**2 + yj(i)**2)
+	axj = -GM_S2*xj(i)/(rjs**3)
+	ayj = -GM_S2*yj(i)/(rjs**3)
+	
+	C         teroide 1
+	ras = sqrt(xa1(i)**2 + ya1(i)**2)
+	raj = sqrt((xa1(i)-xj(i))**2 + (ya1(i)-yj(i))**2)
+	
+	axa1 = -GM_S*xa1(i)/(ras**3) - GM_J*(xa1(i)-xj(i))/(raj**3)
+	aya1 = -GM_S*ya1(i)/(ras**3) - GM_J*(ya1(i)-yj(i))/(raj**3)
+	
+	C         teroide2
+	ras = sqrt(xa2(i)**2 + ya2(i)**2)
+	raj = sqrt((xa2(i)-xj(i))**2 + (ya2(i)-yj(i))**2)
+	
+	axa2 = -GM_S*xa2(i)/(ras**3) - GM_J*(xa2(i)-xj(i))/(raj**3)
+	aya2 = -GM_S*ya2(i)/(ras**3) - GM_J*(ya2(i)-yj(i))/(raj**3)
+	
+	C         teroide 3
+	ras = sqrt(xa3(i)**2 + ya3(i)**2)
+	raj = sqrt((xa3(i)-xj(i))**2 + (ya3(i)-yj(i))**2)
+	
+	axa3 = -GM_S*xa3(i)/(ras**3) - GM_J*(xa3(i)-xj(i))/(raj**3)
+	aya3 = -GM_S*ya3(i)/(ras**3) - GM_J*(ya3(i)-yj(i))/(raj**3)
+	
+	C         atualizaoção das posições usando verlat
+	xj(i+1) = 2*xj(i) - xj(i-1) + axj*dt*dt
+	yj(i+1) = 2*yj(i) - yj(i-1) + ayj*dt*dt
+	
+	xa1(i+1) = 2*xa1(i) - xa1(i-1) + axa1*dt*dt
+	ya1(i+1) = 2*ya1(i) - ya1(i-1) + aya1*dt*dt
+	
+	xa2(i+1) = 2*xa2(i) - xa2(i-1) + axa2*dt*dt
+	ya2(i+1) = 2*ya2(i) - ya2(i-1) + aya2*dt*dt
+	
+	xa3(i+1) = 2*xa3(i) - xa3(i-1) + axa3*dt*dt
+	ya3(i+1) = 2*ya3(i) - ya3(i-1) + aya3*dt*dt
+	
+	end do
+\end{lstlisting}
+\vspace*{1\baselineskip}
+
+% Bloco 8: Sub-rotina calc2 - Parte 4 (Salvamento de Dados e Fim)
+\begin{lstlisting}[caption={Sub-rotina \texttt{calc2}: Salvamento dos dados calculados em arquivos e finalização (parte 4 de 4).}, label={lst:calc2-part4}]
+	C         Salva
+	
+	open(unit=1,file='asteroides_saida.txt')
+	open(unit=2,file='asteroides_saida_2.txt')
+	
+	do i = 0, imax
+	write(1,10) dt*i, xj(i), yj(i), xa1(i), ya1(i)
+	write(2,10) dt*i, xa2(i), ya2(i), xa3(i), ya3(i)
+	end do
+	
+	10      format(F12.6,4(",",F12.6))
+	
+	close(1)
+	close(2)
+	
+	end subroutine calc2
+\end{lstlisting}
+
+ \section*{Descrição do Código}
+
+O programa \texttt{main} tem como objetivo resolver numericamente o problema de três corpos
+(Terra, Sol e Júpiter) e, em seguida, estudar as perturbações gravitacionais de Júpiter sobre
+três asteroides localizados na região do cinturão de asteroides. Para isso, são utilizadas duas
+subrotinas independentes:
+
+\begin{lstlisting}
+	call calc()
+	call calc2()
+\end{lstlisting}
+
+Cada subrotina usa o método de Verlet para integrar as equações de movimento e grava os
+resultados em arquivos para posterior análise gráfica.
+
+\subsection*{Subrotina \texttt{calc}: Terra--Sol--Júpiter}
+
+A primeira subrotina implementa o problema de três corpos envolvendo o Sol (fixo na origem), 
+a Terra e Júpiter. O número máximo de iterações utilizado é:
+
+\begin{lstlisting}
+	parameter (imax = 5e3)
+\end{lstlisting}
+
+Foram definidos quatro vetores para armazenar as posições da Terra e de Júpiter:
+
+\begin{center}
+	\texttt{x\_t, y\_t, x\_j, y\_j}
+\end{center}
+
+todos indexados de \(-1\) até \(\texttt{imax}\), como requerido pelo método de Verlet.
+
+\subsubsection*{Constantes físicas}
+
+Os parâmetros usados são definidos como:
+
+\begin{lstlisting}
+	pi = acos(-1d0)
+	dt = 1d0/365d0
+	GM_S = 4*pi*pi
+	GM_J = GM_S * 0.0009543d0
+	GM_T = GM_S * 3.003d-6
+	GM_S_eff = GM_S + GM_J
+\end{lstlisting}
+
+onde:
+
+\begin{itemize}
+	\item \(GM_S = 4\pi^2\) é a constante gravitacional do Sol em unidades astronômicas,
+	\item \(GM_J\) é o valor ajustado para a massa de Júpiter,
+	\item \(GM_S^\text{eff}\) representa a massa efetiva sentida por Júpiter devido ao Sol fixo.
+\end{itemize}
+
+\subsubsection*{Condições iniciais}
+
+As condições iniciais da Terra e de Júpiter são:
+
+\begin{align}
+	x_T(0) &= 1, & y_T(0) &= 0, &
+	v_{x,T} &= 0, & v_{y,T} &= 2\pi, \\
+	x_J(0) &= 5.2, & y_J(0) &= 0, &
+	v_{x,J} &= 0, &
+	v_{y,J} &= 2\pi\frac{5.2}{11.86}.
+\end{align}
+
+\noindent
+As acelerações iniciais incluem interações Terra–Sol e Terra–Júpiter:
+
+\begin{align}
+	\vec{a}_T = 
+	-\,\frac{GM_S}{r_{TS}^3}\vec{r}_{TS}
+	-\,\frac{GM_J}{r_{TJ}^3}\vec{r}_{TJ},
+\end{align}
+
+e, para Júpiter (com Sol fixo e massa efetiva):
+
+\begin{align}
+	\vec{a}_J = 
+	-\,\frac{GM_S^\text{eff}}{r_{JS}^3}\vec{r}_{JS}.
+\end{align}
+
+\subsubsection*{Passo inicial do método de Verlet}
+
+O método exige as posições no tempo \(-\Delta t\), obtidas por:
+
+\begin{align}
+	x(-1) = x(0) - v_x\,dt + \frac{1}{2}a_x\,dt^2, \qquad
+	y(-1) = y(0) - v_y\,dt + \frac{1}{2}a_y\,dt^2.
+\end{align}
+
+\subsubsection*{Integração numérica}
+
+A integração é realizada pelo método de Verlet:
+
+\begin{align}
+	x_{i+1} &= 2x_i - x_{i-1} + a_x\,dt^2, \\
+	y_{i+1} &= 2y_i - y_{i-1} + a_y\,dt^2.
+\end{align}
+
+As acelerações são recalculadas a cada passo considerando as forças:
+
+\begin{itemize}
+	\item Terra–Sol,
+	\item Terra–Júpiter,
+	\item Júpiter–Sol (massa efetiva).
+\end{itemize}
+
+O laço principal avança ambas as órbitas simultaneamente.
+
+\subsubsection*{Saída de dados}
+
+As coordenadas são gravadas no arquivo:
+
+\begin{center}
+	\texttt{saida\_m\_1.txt}
+\end{center}
+
+no formato:
+
+\[
+t,\; x_T(t),\; y_T(t),\; x_J(t),\; y_J(t).
+\]
+
+Isso permite analisar graficamente a órbita terrestre sob perturbações de Júpiter,
+atendendo aos itens \textbf{b1} e \textbf{b2} da tarefa.
+
+\subsection*{Subrotina \texttt{calc2}: Asteroides sob a perturbação de Júpiter}
+
+A segunda subrotina implementa o item \textbf{b3} da tarefa, estudando a influência 
+de Júpiter sobre três asteroides no cinturão principal.
+
+O número de iterações é:
+
+\begin{lstlisting}
+	parameter (imax = 1000)
+\end{lstlisting}
+
+São definidos:
+
+\begin{itemize}
+	\item posição de Júpiter: \texttt{xj, yj},
+	\item três asteroides: \texttt{xa1, ya1}, \texttt{xa2, ya2}, \texttt{xa3, ya3}.
+\end{itemize}
+
+\subsubsection*{Condições iniciais}
+
+As condições de Júpiter são:
+
+\begin{align}
+	x_J(0) &= 5.2, &
+	y_J(0) &= 0, &
+	v_{y,J} &= 2.755.
+\end{align}
+
+Os asteroides são inicializados conforme os dados do enunciado:
+
+\begin{align}
+	(x_{A1}, y_{A1}, v_{y,A1}) &= (3.0,\; 0,\; 3.628), \\
+	(x_{A2}, y_{A2}, v_{y,A2}) &= (3.276,\; 0,\; 3.471), \\
+	(x_{A3}, y_{A3}, v_{y,A3}) &= (3.700,\; 0,\; 3.267).
+\end{align}
+
+\subsubsection*{Dinâmica gravitacional}
+
+Cada asteroide sofre duas forças:
+
+\begin{align}
+	\vec{F} = 
+	-\,\frac{GM_S}{r_{AS}^3}\vec{r}_{AS}
+	-\,\frac{GM_J}{r_{AJ}^3}\vec{r}_{AJ}.
+\end{align}
+
+O efeito dos asteroides sobre Júpiter é desprezado, conforme pedido.
+
+\subsubsection*{Integração}
+
+O mesmo esquema de Verlet é utilizado:
+
+\begin{align}
+	x_{i+1} &= 2x_i - x_{i-1} + a_x\,dt^2, \\
+	y_{i+1} &= 2y_i - y_{i-1} + a_y\,dt^2.
+\end{align}
+
+Todos os quatro corpos (Júpiter + 3 asteroides) são atualizados em cada iteração.
+
+\subsubsection*{Saída de dados}
+
+Dois arquivos são produzidos:
+
+\begin{itemize}
+	\item \texttt{asteroides\_saida.txt}: Júpiter + Asteroide I.
+	\item \texttt{asteroides\_saida\_2.txt}: Asteroides II e III.
+\end{itemize}
+
+O formato de saída é:
+
+\[
+t,\; x(t),\; y(t),\; x'(t),\; y'(t).
+\]
+
+Esses dados permitem identificar ressonâncias orbitais e lacunas de Kirkwood, conforme a tarefa solicita.
+
+\section*{Resumo}
+
+O código implementa:
+
+\begin{itemize}
+	\item o método de Verlet para todas as partículas;
+	\item a interação Terra–Sol–Júpiter (problema de três corpos);
+	\item a perturbação de Júpiter sobre três asteroides do cinturão principal;
+	\item saídas organizadas para análise posterior das órbitas.
+\end{itemize}
+
+O programa atende completamente aos itens \textbf{b1}, \textbf{b2} e \textbf{b3} da Tarefa B do projeto.
+
+
+
+\section*{Resultados }
 
 \begin{figure}[H]
-\centering
-\caption{Função principal do código.}
-\centering
-
-\begin{lstlisting}
-        program main
-        call euler_crommer()
-        end program main
-\end{lstlisting}
-
-\caption*{Fonte: Compilado pelo Autor.}
-\label{fig:tarefa B - função principal do código}
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig3.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 1}
 \end{figure}
-
-\vspace*{1\baselineskip}
 
 \begin{figure}[H]
-\centering
-\caption{Implementação do método de Euler-Cromer.}
-\centering
-
-\begin{lstlisting}
-
-        subroutine euler_crommer()
-        parameter (imax=1e4)
-        implicit real*8(a-h,o-z)
-        dimension th(0:imax),w(0:imax)
-
-C       Constantes
-        rl = 9.81d0
-        g = 9.81d0
-        m = 1d0
-        y = 0.050d0 !Gamma
-        F0 = 0.50d0 !Força externa
-        ome = 0.75d0 ! Frequência da força externa
-        pi = acos(-1d0)
-        dt = 0.04d0
-
-C       Valores iniciais
-        w(0) = 0
-        th(0) = pi/3d0
-
-C       Cálculo
-
-        do i = 0,imax-1
-                F_ex = -y*w(i) + F0*sin(ome*i*dt)
-                w(i+1) = w(i)-(g/rl)*sin(th(i))*dt + F_ex*dt
-                th(i+1) = th(i) + w(i+1)*dt
-        end do
-
-C       Salva a posição
-        open(unit=1,file='saida-1-12694394.txt')
-        do i =0,imax
-        ! Trem das posições
-        if (th(i+1) .GT. 2*pi) then
-                th(i+1) = th(i+1) - 2*pi
-        else if (th(i+1) .LT. 0 ) then
-                th(i+1) = th(i+1) + 2*pi
-        end if
-
-                write(1,7) i*dt, w(i), th(i)
-        end do
-7       format(F12.6,F12.6,F12.6)
-        close(1)
-        end subroutine euler_crommer
-
-\end{lstlisting}
-
-\caption*{Fonte: Compilado pelo Autor.}
-\label{fig:tarefa B - Euler Cromer código}
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig_m1.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 2}
 \end{figure}
 
+\begin{figure}[H]
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig_m100.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 3}
+\end{figure}
 
+\begin{figure}[H]
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig_m1000.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 4}
+\end{figure}
 
-\newpage\section*{Descrição do código}
+\begin{figure}[H]
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig_m10000.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 5}
+\end{figure}
 
-O programa \texttt{main} tem como objetivo simular numericamente o movimento 
-de um pêndulo simples sujeito a atrito viscoso e a uma força externa 
-periódica, utilizando o método de integração de \textit{Euler-Cromer}.  
-O cálculo é implementado na subrotina \texttt{euler\_crommer}, chamada a 
-partir do programa principal.  
+\begin{figure}[H]
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/fig2.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa B - Resultado 6}
+\end{figure}
 
-\vspace*{1\baselineskip}
-\noindent
-A diretiva
-
-\begin{lstlisting}
-implicit real*8 (a-h,o-z)
-\end{lstlisting}
-
-\noindent
-define todas as variáveis cujos nomes iniciam com as letras de 
-\textbf{a} a \textbf{h} e \textbf{o} a \textbf{z} como números reais de 
-dupla precisão, garantindo maior precisão nos cálculos numéricos.  
-
-\subsection*{Subrotina \texttt{euler\_crommer}}
-
-A subrotina \texttt{euler\_crommer} executa o cálculo principal da 
-simulação.  
-Primeiramente, são definidos o número máximo de iterações 
-(\texttt{imax = 1e4}) e os vetores \texttt{w(0:imax)} e 
-\texttt{th(0:imax)}, que armazenam respectivamente a velocidade angular 
-($\omega$) e o ângulo ($\theta$) do pêndulo em cada passo de tempo.  
-
-As constantes físicas e parâmetros do sistema são definidos como:
-
-\begin{lstlisting}
-rl = 9.81d0      ! Comprimento do pêndulo
-g  = 9.81d0      ! Aceleração da gravidade
-m  = 1d0         ! Massa
-y  = 0.050d0     ! Coeficiente de amortecimento (Gamma)
-F0 = 0.50d0      ! Amplitude da força externa
-ome = 0.75d0     ! Frequência angular da força externa
-dt = 0.04d0      ! Passo temporal
-pi = acos(-1d0)  ! Valor de pi
-\end{lstlisting}
-
-\noindent
-As condições iniciais são fixadas como $\omega(0) = 0$ e 
-$\theta(0) = \pi/3$.  
-
-O método de Euler-Cromer é então aplicado dentro de um laço de 
-iterações que atualiza a velocidade angular e o ângulo a cada passo de 
-tempo.  
-A força externa e o termo de amortecimento são incluídos na equação de 
-movimento, resultando no seguinte esquema numérico:
-
-\begin{lstlisting}
-do i = 0, imax-1
-    F_ex = -y*w(i) + F0*sin(ome*i*dt)
-    w(i+1) = w(i) - (g/rl)*sin(th(i))*dt + F_ex*dt
-    th(i+1) = th(i) + w(i+1)*dt
-end do
-\end{lstlisting}
-
-\noindent
-O termo \texttt{F\_ex} representa a soma da força de amortecimento 
-($-y\omega$) e da força externa periódica 
-($F_0 \sin(\omega_{\text{ext}} t)$).  
-O uso do método de Euler-Cromer garante maior estabilidade e melhor 
-conservação de energia do sistema em comparação com o método de Euler 
-tradicional, especialmente em sistemas oscilatórios.  
-
-\subsection*{Saída dos resultados}
-
-Após o cálculo, os resultados da simulação são gravados no arquivo 
-\texttt{saida-1-12694394.txt}.  
-Cada linha do arquivo contém o tempo ($t = i \cdot \Delta t$), a velocidade 
-angular $\omega$ e o ângulo $\theta$, conforme o formato:
-
-\begin{lstlisting}
-7 format(F12.6,F12.6,F12.6)
-\end{lstlisting}
-
-\noindent
-Antes da escrita, o programa corrige o ângulo $\theta$ para mantê-lo dentro 
-do intervalo $[0, 2\pi]$, utilizando a verificação:
-
-\begin{lstlisting}
-if (th(i+1) .GT. 2*pi) then
-    th(i+1) = th(i+1) - 2*pi
-else if (th(i+1) .LT. 0) then
-    th(i+1) = th(i+1) + 2*pi
-end if
-\end{lstlisting}
-
-\noindent
-Por fim, o arquivo é fechado com o comando \texttt{close(1)}.  
-
-\subsection*{Resumo}
-
-Em resumo, o código realiza a integração numérica das equações de movimento 
-de um pêndulo forçado e amortecido pelo método de Euler-Cromer.  
-O programa permite estudar o comportamento dinâmico do sistema sob 
-diferentes condições de força e amortecimento, sendo útil para análises de 
-regimes oscilatórios, ressonância e comportamento caótico em pêndulos 
-não-lineares.
-
-
-\section*{Resultados e Discussão}
-
+\begin{figure}[H]
+	\centering
+	\caption{Lacunas de Kirkwood.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-B/Kirkwood-20060509.png}
+	\caption*{Fonte: Retirado da Wikipédia.}
+	\label{fig:tarefa B - Resultado 7}
+\end{figure}
 
 \section*{Discussão dos Resultados}
 

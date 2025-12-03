@@ -212,7 +212,7 @@ instante inicial.
 
 \subsection*{Método numérico}
 
-A integração é realizada por um método do tipo Verlet, dado por:
+A integração é realizada pelo método de  Verlet, dado por:
 
 \begin{equation}
 	x_{i+1} = 2x_i - x_{i-1} + a_x\, dt^2,
@@ -229,9 +229,6 @@ com as acelerações calculadas pela lei da gravitação universal:
 	r = \sqrt{x^2 + y^2}
 \end{equation}
 
-\noindent
-Esse método é conhecido por sua boa conservação da energia mecânica ao longo 
-do tempo, característica particularmente útil em simulações orbitais.
 
 \subsection*{Cálculo da área varrida}
 
@@ -318,18 +315,7 @@ O código implementa:
 Trata-se de uma implementação eficiente para o estudo de órbitas keplerianas 
 e propriedades fundamentais do movimento sob gravitação central.
 
-\subsection*{Resumo}
-
-Em síntese, o código compara numericamente os métodos de Euler e 
-Euler-Cromer na simulação de um pêndulo simples, permitindo observar 
-diferenças na conservação da energia ao longo do tempo.  
-Cada método gera dois arquivos de saída: um contendo os parâmetros 
-dinâmicos ($\omega$ e $\theta$) e outro contendo as energias calculadas em 
-cada instante.
-
-
 \section*{Resultados}
-
 
 \begin{table}[h!]
 	\centering
@@ -355,3 +341,25 @@ cada instante.
 	\vspace*{1\baselineskip}
 	\caption*{Fonte: Compilado pelo Autor}
 \end{table}
+
+
+\begin{figure}[H]
+	\centering
+	\caption{Área varrida por um planeta entre as interações $i$ e $i+1$.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-A/fig1.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa A - Resultado 2}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\caption{Exemplo de órbita de um planeta.}
+	\centering
+	\includegraphics[width=16cm]{images/tarefa-A/fig2.png}
+	\caption*{Fonte: Compilado pelo Autor.}
+	\label{fig:tarefa A - Resultado 3}
+\end{figure}
+
+\section*{Discussão dos resultados}
+
